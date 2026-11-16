@@ -1,4 +1,4 @@
-<title>Port Alder Manhunt</title>
+<title>Impossible Hunt</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
@@ -167,8 +167,8 @@
   @media (prefers-reduced-motion: reduce) { #feed div, .bar i { transition: none; } }
 </style>
 
-<canvas id="scene" aria-label="Port Alder Manhunt game view"></canvas>
-<div id="loading">Building Port Alder…</div>
+<canvas id="scene" aria-label="Impossible Hunt game view"></canvas>
+<div id="loading">Building the city…</div>
 
 <div id="hud" hidden>
   <div id="dmg"></div>
@@ -212,7 +212,7 @@
 <div class="overlay" id="menu">
   <div class="card">
     <button type="button" class="langBtn" aria-label="切換為繁體中文">繁體中文</button>
-    <h1><small>Port Alder</small>Manhunt</h1>
+    <h1>Impossible Hunt</h1>
     <p>The whole city is looking for you. Survive each level's clock to unlock the next: level 1 is 5 minutes, level 2 is 10, level 3 is 15, and the city gets tougher each time. Cameras sweep the streets, and anyone who sees you calls it in. Police chase and arrest on sight. Break line of sight, hide in alleys and parks, and use what you find to defend yourself.</p>
     <div class="row" role="group" aria-label="Mode" id="modeRow"><span class="label">Mode</span><button type="button" data-gm="manhunt" aria-pressed="true">Manhunt</button><button type="button" data-gm="hunt" aria-pressed="false">The Hunt</button></div>
     <div id="modeInfo"></div>
@@ -1787,11 +1787,11 @@ const ZH = {
   'The Hunt: you are an assassin. Find the glowing celebrity Rex Starling and take him out. The police ignore you until he falls, then the whole city comes for you.': '獵殺行動：你是刺客。找到發光的名人雷克斯·星鷹並解決他。他倒下前警察不會理你，之後全城都會追捕你。',
   'Manhunt: the whole city hunts you. Survive the clock.': '全城追捕：整座城市都在追捕你。撐到時間結束。',
   'Rex Starling is down!': '雷克斯·星鷹倒下了！', 'The police know. Survive until the clock runs out.': '警察知道了。撐到時間結束。',
-  'Building Port Alder…': '正在建造港橡市…', Health: '生命', Stamina: '體力', 'City alert': '全城警戒', Calm: '平靜', Suspicious: '起疑', Searching: '搜索中', Manhunt: '全城追捕', Lockdown: '全城封鎖', Pause: '暫停',
+  'Building the city…': '正在建造城市…', Health: '生命', Stamina: '體力', 'City alert': '全城警戒', Calm: '平靜', Suspicious: '起疑', Searching: '搜索中', Manhunt: '全城追捕', Lockdown: '全城封鎖', Pause: '暫停',
   'Click to capture the mouse': '點一下以鎖定滑鼠', 'Turn your phone sideways for a wider view': '將手機橫放可看到更寬的畫面',
   'WASD move · Shift sprint · C crouch · Click attack · 1-8 weapons · E drive / board train · walk into lit doorways · P pause': 'WASD 移動 · Shift 衝刺 · C 蹲下 · 點擊攻擊 · 1-8 武器 · E 開車／搭火車 · 走進亮燈的門口 · P 暫停',
   ATTACK: '攻擊', RUN: '奔跑', HIDE: '躲藏', SWAP: '換武器', USE: '使用', EXIT: '下車',
-  'Port Alder': '港橡市', Level: '關卡', 'Start the hunt': '開始追捕', 'Full screen': '全螢幕',
+  'Impossible Hunt': '不可能的獵殺', Level: '關卡', 'Start the hunt': '開始追捕', 'Full screen': '全螢幕',
   "The whole city is looking for you. Survive each level's clock to unlock the next: level 1 is 5 minutes, level 2 is 10, level 3 is 15, and the city gets tougher each time. Cameras sweep the streets, and anyone who sees you calls it in. Police chase and arrest on sight. Break line of sight, hide in alleys and parks, and use what you find to defend yourself.": '全城都在找你。撐過每一關的倒數時間就能解鎖下一關：第 1 關 5 分鐘，第 2 關 10 分鐘，第 3 關 15 分鐘，而且每一關城市都會更難纏。攝影機掃視街道，看到你的人都會通報。警察一發現你就會追捕。躲開視線，藏進巷子和公園，並善用找到的東西自保。',
   'Play with friends (online co-op, up to 4)': '和朋友一起玩（線上合作，最多 4 人）', 'Create room': '建立房間', Join: '加入', 'Room code': '房間代碼', 'Leave room': '離開房間', 'Your name': '你的名字', Code: '代碼',
   Cameras: '攝影機', 'on poles sweep a beam across the streets. Step into the beam and it turns red and the alert jumps.': '裝在桿子上，光束掃過街道。踏進光束，它會變紅，警戒值也會暴增。',
@@ -1813,7 +1813,7 @@ const ZH = {
   ready: '就緒', 'not found': '尚未找到', 'Replay level': '重玩本關', 'Try again': '再試一次', 'Time survived': '存活時間', 'Times spotted': '被發現次數', 'People taken out': '擊倒人數', 'Police taken out': '擊倒警察', 'Final alert': '最終警戒',
   'Board the train': '搭乘火車', 'Riding the train: wait for a stop': '乘車中：等待到站', 'Train stop: wait here for the next train': '火車站：在此等待下一班列車', 'Drive the car': '駕駛這輛車', 'Ride the scooter': '騎這台機車', 'Take the car': '搶這輛車', 'Take the scooter': '搶這台機車', 'Get out': '下車', 'Hop off': '下機車',
   'Click or press P to resume. Press Esc to free the mouse.': '點一下或按 P 繼續。按 Esc 釋放滑鼠。', 'Mouse released. Press Resume or P to recapture it.': '滑鼠已釋放。按「繼續」或 P 重新鎖定。',
-  'Time is up and Port Alder never got its hands on you.': '時間到，港橡市始終沒能抓到你。', 'You beat every level. Port Alder never got its hands on you.': '你通過了所有關卡，港橡市始終沒能抓到你。',
+  'Time is up and The city never got its hands on you.': '時間到，全城始終沒能抓到你。', 'You beat every level. The city never got its hands on you.': '你通過了所有關卡，全城始終沒能抓到你。',
   '2 flashbangs. Press 7: stuns everyone near the blast and blinds cameras.': '2 顆閃光彈。按 7：讓爆炸附近的人全部暈眩，並讓攝影機失明。', '3 caltrops. Press 8: drop them behind you to trip chasing police.': '3 個鐵蒺藜。按 8：丟在身後讓追你的警察絆倒。', '3 smoke bombs added. Press 4.': '獲得 3 顆煙霧彈。按 4。',
   'A police car hit you! Get off the road.': '警車撞到你了！快離開馬路。', 'A police car hit your caltrops and blew its tyres.': '警車壓到你的鐵蒺藜，輪胎爆了。', 'A police car rammed you!': '警車衝撞了你！', 'A police officer followed you inside!': '有警察跟你進來了！', 'An officer dragged you out!': '警察把你拖出來了！',
   'An officer is grabbing you! Fight back or run.': '警察抓住你了！快反擊或逃跑。', 'Caltrops dropped. Anyone chasing you over them trips.': '鐵蒺藜已丟下。追你的人踩到就會絆倒。', 'Full screen is not available here.': '這裡無法使用全螢幕。', 'Get out first (E) to use that.': '請先下車（E）才能使用。',
@@ -1844,7 +1844,7 @@ const ZHRE = [
   [/^You slipped into the (.+)\. Cameras can’t see you in here\.$/, m => `你溜進了${zl(m[1])}。攝影機看不到這裡。`],
   [/^Baton: (?:knocked one down|knocked (\d+) down)\.$/, m => m[1] ? `警棍：打倒了 ${m[1]} 人。` : '警棍：打倒了 1 人。'], [/^Bat: (?:knocked one back|knocked (\d+) back)\.$/, m => m[1] ? `球棒：擊退了 ${m[1]} 人。` : '球棒：擊退了 1 人。'],
   [/^Level (\d+)$/, m => `第 ${m[1]} 關`], [/^Level (\d+) complete$/, m => `第 ${m[1]} 關完成`], [/^Captured on level (\d+)$/, m => `在第 ${m[1]} 關被抓到`], [/^Start level (\d+)$/, m => `開始第 ${m[1]} 關`], [/^Start level (\d+) together$/, m => `一起開始第 ${m[1]} 關`], [/^Start level (\d+) on your own$/, m => `自己開始第 ${m[1]} 關`],
-  [/^Next level \((\d+) min\)$/, m => `下一關（${m[1]} 分鐘）`], [/^Level (\d+) is unlocked\.$/, m => `第 ${m[1]} 關已解鎖。`], [/^Time is up and Port Alder never got its hands on you\. Level (\d+) is unlocked\.$/, m => `時間到，港橡市始終沒能抓到你。第 ${m[1]} 關已解鎖。`],
+  [/^Next level \((\d+) min\)$/, m => `下一關（${m[1]} 分鐘）`], [/^Level (\d+) is unlocked\.$/, m => `第 ${m[1]} 關已解鎖。`], [/^Time is up and The city never got its hands on you\. Level (\d+) is unlocked\.$/, m => `時間到，全城始終沒能抓到你。第 ${m[1]} 關已解鎖。`],
   [/^The city caught up with you after (.+)\.$/, m => `撐了 ${m[1]} 後，全城追上了你。`], [/^Get off at (.+)$/, m => `在${zl(m[1])}下車`],
   [/^Level (\d+): survive (\d+) minutes with (\d+) cameras watching( and more police than the level before)?\. Beat a level to unlock the next\.$/, m => `第 ${m[1]} 關：存活 ${m[2]} 分鐘，有 ${m[3]} 台攝影機監視${m[4] ? '，警察也比上一關更多' : ''}。通過一關即可解鎖下一關。`],
   [/^Level (\d+) · (\S+) left · health (\d+) · alert (\d+)% · (\d+) people taken out \((\d+) police\)$/, m => `第 ${m[1]} 關 · 剩餘 ${m[2]} · 生命 ${m[3]} · 警戒 ${m[4]}% · 已擊倒 ${m[5]} 人（警察 ${m[6]} 人）`],
@@ -2488,7 +2488,7 @@ function endGame(win, why) {
   $('btnNext').style.display = win && level < MAX_LEVEL ? '' : 'none'; $('btnNext').textContent = tr(H ? 'Next contract' : `Next level (${(level + 1) * 5} min)`);
   $('btnAgain').textContent = tr(win ? 'Replay level' : 'Try again'); $('btnAgain').classList.toggle('primary', !(win && level < MAX_LEVEL));
   renderLevels();
-  $('overText').textContent = tr(H ? (win ? `Rex Starling is down and you slipped away from the police.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}` : why === 'time' ? 'Time ran out and the celebrity got away.' : 'The police got to you before you could escape.') : win ? (level >= MAX_LEVEL ? 'You beat every level. Port Alder never got its hands on you.' : `Time is up and Port Alder never got its hands on you.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}`) : `The city caught up with you after ${fmt(game.elapsed)}.`);
+  $('overText').textContent = tr(H ? (win ? `Rex Starling is down and you slipped away from the police.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}` : why === 'time' ? 'Time ran out and the celebrity got away.' : 'The police got to you before you could escape.') : win ? (level >= MAX_LEVEL ? 'You beat every level. The city never got its hands on you.' : `Time is up and The city never got its hands on you.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}`) : `The city caught up with you after ${fmt(game.elapsed)}.`);
   $('overStats').innerHTML = [[fmt(game.elapsed), 'Time survived'], [game.spottedCount, 'Times spotted'], [game.takenOut, 'People taken out'], [game.copsOut, 'Police taken out'], [Math.round(game.alert) + '%', 'Final alert']].map(([b, s]) => `<div><b>${b}</b><span>${tr(s)}</span></div>`).join('');
   if (sirenGain && AC) sirenGain.gain.setTargetAtTime(0, AC.currentTime, 0.2);
 }
