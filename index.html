@@ -87,6 +87,7 @@
   #thArrow { display: inline-block; color: #ffd24a; }
   body.touch #targetHint { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); font-size: 11.5px; padding: 3px 10px; }
   #modeInfo { font-size: 13px; color: var(--hud-dim); }
+  #mpStatus.bad { color: #ff9a85; font-weight: 600; }
   body.touch #stopHint { bottom: calc(64px + env(safe-area-inset-bottom, 0px)); font-size: 11.5px; padding: 3px 10px; }
   #flash { inset: 0; background: #fff; opacity: 0; }
   .card { position: relative; }
@@ -148,6 +149,12 @@
   body.touch .wslot svg { width: 22px; height: 22px; margin-top: 0; }
   body.touch .wslot b { font-size: 11px; }
   body.touch .wslot small { font-size: 10px; }
+  #mmLegend { bottom: calc(230px + env(safe-area-inset-bottom, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: 200px; display: flex; flex-wrap: wrap; gap: 3px 10px; justify-content: flex-end; font-size: 11px; color: var(--hud-dim); text-shadow: 0 1px 3px #000; }
+  #mmLegend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  #mmLegend i { display: inline-block; width: 8px; height: 8px; }
+  #mmLegend .lg-cop { border-radius: 50%; background: #ff3b30; } #mmLegend .lg-car { background: #3d6dff; outline: 1px solid #fff; width: 7px; height: 7px; }
+  #mmLegend .lg-rex { background: #ffd24a; transform: rotate(45deg); width: 7px; height: 7px; } #mmLegend .lg-train { background: #4f9dff; border-radius: 2px; width: 12px; height: 4px; }
+  #mmLegend .lg-you { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 9px solid #ff9a3c; }
   body.touch #minimap { top: calc(96px + env(safe-area-inset-top, 0px)); bottom: auto; width: 100px; height: 105px; }
   body.touch #alertPanel { width: 150px; padding: 7px 9px; gap: 4px; }
   body.touch #vitals { width: 150px; padding: 7px 9px; gap: 4px; }
@@ -196,6 +203,7 @@
   <div id="squad"></div>
   <div id="weapons"></div>
   <canvas id="minimap" width="200" height="210" aria-label="Minimap"></canvas>
+  <div id="mmLegend" class="deskOnly" aria-hidden="true"><span><i class="lg-cop"></i>Police</span><span><i class="lg-car"></i>Police car</span><span id="lgRex"><i class="lg-rex"></i>Rex</span><span><i class="lg-train"></i>Train</span><span><i class="lg-you"></i>You</span></div>
   <div id="rotateHint">Turn your phone sideways for a wider view</div>
   <div id="hint">WASD move · Shift sprint · C crouch · Click attack · 1-8 weapons · E drive / board train · walk into lit doorways · P pause</div>
 </div>
@@ -1274,7 +1282,7 @@ let unlocked = 1; try { unlocked = clamp(parseInt(localStorage.getItem('portAlde
 let level = unlocked;
 let selMode = 'manhunt'; try { if (localStorage.getItem('portAlderMode') === 'hunt') selMode = 'hunt'; } catch (e) {}
 let gmode = 'manhunt';
-const hunt = { phase: 'off', celeb: null, t: 0, fx: null, hintT: 0, downT: 0 };
+const hunt = { phase: 'off', guards: [], aggro: false, calmT: 0, celeb: null, t: 0, fx: null, hintT: 0, downT: 0 };
 function huntPassive() { return gmode === 'hunt' && hunt.phase === 'hunt'; }
 const levelCfg = L => ({ time: L * 300, alert: 0.55 + 0.09 * (L - 1), cops: 0.6 + 0.1 * (L - 1), cams: Math.min(44, 16 + 3 * (L - 1)), reinforce: Math.max(1.2, 4 - 0.28 * L), pcars: Math.min(6, 1 + Math.floor(L / 2)) });
 let LV = levelCfg(level);
@@ -1306,6 +1314,7 @@ const TYPES = {
   nurse: { torso: 0x7fb8c9, legs: 0x7fb8c9, hat: 0, speed: 1.6, run: 4.6, label: 'nurse', view: 28, weight: 7 },
   worker: { torso: 0xf08a1e, legs: 0x4a4a4a, hat: 2, hatCol: 0xf5d020, speed: 1.5, run: 4.8, label: 'construction worker', view: 30, weight: 9 },
   jogger: { torso: 0xd6336c, legs: 0x202020, hat: 0, speed: 3.3, run: 5.4, label: 'jogger', view: 26, weight: 9 },
+  guard: { torso: 0x15171c, legs: 0x0d0e11, hat: 0, speed: 1.8, run: 5.4, label: 'bodyguard', view: 22, weight: 0 },
   celeb: { torso: 0xffc933, legs: 0x1a1a1a, hat: 0, speed: 1.8, run: 5.2, label: 'celebrity', view: 20, weight: 0 },
 };
 const TYPE_KEYS = Object.keys(TYPES), TYPE_W = TYPE_KEYS.map(k => TYPES[k].weight), TYPE_SUM = TYPE_W.reduce((a, b) => a + b, 0);
@@ -1778,13 +1787,23 @@ const sfx = { spot: () => { tone(880, 1320, 0.12, 'square', 0.08); setTimeout(()
 const feedEl = $('feed');
 // ---------- language: English / 繁體中文 (Traditional Chinese), remembered between visits ----------
 let LANG = 'en'; try { if (localStorage.getItem('portAlderLang') === 'zh') LANG = 'zh'; } catch (e) {}
-const ZH_LABEL = { citizen: '市民', 'police officer': '警察', celebrity: '名人', postman: '郵差', teacher: '老師', nurse: '護理師', 'construction worker': '工地工人', jogger: '慢跑者', 'apartment lobby': '公寓大廳', 'café': '咖啡廳', 'corner shop': '便利商店', 'metro station': '捷運站', 'office lobby': '辦公大樓大廳', Fists: '拳頭', 'Stun baton': '電擊警棍', Taser: '電擊槍', 'Smoke bomb': '煙霧彈', Bat: '球棒', Slingshot: '彈弓', Flashbang: '閃光彈', Caltrops: '鐵蒺藜', 'stun baton': '電擊警棍', taser: '電擊槍', 'smoke bomb': '煙霧彈', bat: '球棒', slingshot: '彈弓', flashbang: '閃光彈', caltrops: '鐵蒺藜', fists: '拳頭', Northside: '北區', 'East Quay': '東碼頭', Southbank: '南岸', Westgate: '西門' };
+const ZH_LABEL = { citizen: '市民', 'police officer': '警察', celebrity: '名人', bodyguard: '保鑣', postman: '郵差', teacher: '老師', nurse: '護理師', 'construction worker': '工地工人', jogger: '慢跑者', 'apartment lobby': '公寓大廳', 'café': '咖啡廳', 'corner shop': '便利商店', 'metro station': '捷運站', 'office lobby': '辦公大樓大廳', Fists: '拳頭', 'Stun baton': '電擊警棍', Taser: '電擊槍', 'Smoke bomb': '煙霧彈', Bat: '球棒', Slingshot: '彈弓', Flashbang: '閃光彈', Caltrops: '鐵蒺藜', 'stun baton': '電擊警棍', taser: '電擊槍', 'smoke bomb': '煙霧彈', bat: '球棒', slingshot: '彈弓', flashbang: '閃光彈', caltrops: '鐵蒺藜', fists: '拳頭', Northside: '北區', 'East Quay': '東碼頭', Southbank: '南岸', Westgate: '西門' };
 const zl = s => ZH_LABEL[s] || s;
 const ZH = {
+  'Police car': '警車', Rex: '雷克斯', Train: '火車', You: '你',
+  'Rex Starling\u2019s bodyguards are coming for you!': '雷克斯·星鷹的保鑣衝過來了！', 'A bodyguard hits you! Fight back or run.': '保鑣打中你了！反擊或快逃。', 'The bodyguards lost you and went back to Rex Starling.': '保鑣跟丟了你，回到雷克斯·星鷹身邊。',
+  'Reconnected to the host.': '已重新連上房主。',
+  'Leave the room and join again when they are back.': '等房主回來後，離開房間再重新加入。',
+  Room: '房間', 'No friends connected yet': '還沒有朋友連上', 'Connection problem': '連線有問題', 'You start next to your friends.': '你會從朋友旁邊開始。',
+  'Online play could not connect on this page.': '這個頁面無法連上線上遊玩。', 'Every player has to be signed in to claude.ai and have this game shared with them. Otherwise play from the web link version.': '每位玩家都必須登入 claude.ai，而且這個遊戲要分享給他們。否則請改用網頁連結版本。',
+  'That room code is already taken. Press Create room again for a new one.': '這個房間代碼已被使用。請再按一次「建立房間」取得新的代碼。', 'Could not reach the online play service. Check your internet connection and try again.': '連不上線上遊玩服務。請檢查網路後再試一次。',
+  'Online connection problem. Your friends may not see you.': '線上連線有問題，朋友可能看不到你。', 'Connection problem. Leave the room and join again.': '連線有問題。請離開房間後重新加入。', 'Connection lost. Trying to reconnect…': '連線中斷，正在重新連線…',
+  'Connected through claude.ai.': '已透過 claude.ai 連線。', 'Connected directly.': '已直接連線。', 'Nobody has created this room yet. Check the code with your friend.': '還沒有人建立這個房間。請跟朋友確認代碼。', 'Looking for the host…': '正在尋找房主…',
+  'On claude.ai your friends must be signed in and have this game shared with them.': '在 claude.ai 上，朋友必須登入，而且這個遊戲要分享給他們。',
   'Rex Starling': '雷克斯·星鷹', 'The Hunt': '獵殺行動', Mode: '模式', 'Escape the police!': '逃離警察！', 'Contract complete': '任務完成', 'Contract failed': '任務失敗', 'Taken down': '被制伏了', 'Next contract': '下一個任務',
   'Time ran out and the celebrity got away.': '時間到了，名人逃走了。', 'The police got to you before you could escape.': '你還沒逃掉，警察就逮到你了。',
   'The Hunt: find Rex Starling, the glowing celebrity, and take him out. The police leave you alone until he falls.': '獵殺行動：找到發光的名人雷克斯·星鷹並解決他。在他倒下之前，警察不會理你。',
-  'The Hunt: you are an assassin. Find the glowing celebrity Rex Starling and take him out. The police ignore you until he falls, then the whole city comes for you.': '獵殺行動：你是刺客。找到發光的名人雷克斯·星鷹並解決他。他倒下前警察不會理你，之後全城都會追捕你。',
+  'The Hunt: you are an assassin. Find the glowing celebrity Rex Starling and take him out. His bodyguards fight back, and there are more of them on higher levels. The police ignore you until he falls, then the whole city comes for you.': '獵殺行動：你是刺客。找到發光的名人雷克斯·星鷹並解決他。他的保鑣會反擊，關卡越高人數越多。他倒下前警察不會理你，之後全城都會追捕你。',
   'Manhunt: the whole city hunts you. Survive the clock.': '全城追捕：整座城市都在追捕你。撐到時間結束。',
   'Rex Starling is down!': '雷克斯·星鷹倒下了！', 'The police know. Survive until the clock runs out.': '警察知道了。撐到時間結束。',
   'Building the city…': '正在建造城市…', Health: '生命', Stamina: '體力', 'City alert': '全城警戒', Calm: '平靜', Suspicious: '起疑', Searching: '搜索中', Manhunt: '全城追捕', Lockdown: '全城封鎖', Pause: '暫停',
@@ -1813,7 +1832,7 @@ const ZH = {
   ready: '就緒', 'not found': '尚未找到', 'Replay level': '重玩本關', 'Try again': '再試一次', 'Time survived': '存活時間', 'Times spotted': '被發現次數', 'People taken out': '擊倒人數', 'Police taken out': '擊倒警察', 'Final alert': '最終警戒',
   'Board the train': '搭乘火車', 'Riding the train: wait for a stop': '乘車中：等待到站', 'Train stop: wait here for the next train': '火車站：在此等待下一班列車', 'Drive the car': '駕駛這輛車', 'Ride the scooter': '騎這台機車', 'Take the car': '搶這輛車', 'Take the scooter': '搶這台機車', 'Get out': '下車', 'Hop off': '下機車',
   'Click or press P to resume. Press Esc to free the mouse.': '點一下或按 P 繼續。按 Esc 釋放滑鼠。', 'Mouse released. Press Resume or P to recapture it.': '滑鼠已釋放。按「繼續」或 P 重新鎖定。',
-  'Time is up and The city never got its hands on you.': '時間到，全城始終沒能抓到你。', 'You beat every level. The city never got its hands on you.': '你通過了所有關卡，全城始終沒能抓到你。',
+  'Time is up and the city never got its hands on you.': '時間到，全城始終沒能抓到你。', 'You beat every level. The city never got its hands on you.': '你通過了所有關卡，全城始終沒能抓到你。',
   '2 flashbangs. Press 7: stuns everyone near the blast and blinds cameras.': '2 顆閃光彈。按 7：讓爆炸附近的人全部暈眩，並讓攝影機失明。', '3 caltrops. Press 8: drop them behind you to trip chasing police.': '3 個鐵蒺藜。按 8：丟在身後讓追你的警察絆倒。', '3 smoke bombs added. Press 4.': '獲得 3 顆煙霧彈。按 4。',
   'A police car hit you! Get off the road.': '警車撞到你了！快離開馬路。', 'A police car hit your caltrops and blew its tyres.': '警車壓到你的鐵蒺藜，輪胎爆了。', 'A police car rammed you!': '警車衝撞了你！', 'A police officer followed you inside!': '有警察跟你進來了！', 'An officer dragged you out!': '警察把你拖出來了！',
   'An officer is grabbing you! Fight back or run.': '警察抓住你了！快反擊或逃跑。', 'Caltrops dropped. Anyone chasing you over them trips.': '鐵蒺藜已丟下。追你的人踩到就會絆倒。', 'Full screen is not available here.': '這裡無法使用全螢幕。', 'Get out first (E) to use that.': '請先下車（E）才能使用。',
@@ -1830,7 +1849,7 @@ const ZH = {
 };
 const ZHRE = [
   [/^Level (\d+) · The Hunt$/, m => `第 ${m[1]} 關 · 獵殺行動`], [/^Target: Rex Starling · (\d+) m$/, m => `目標：雷克斯·星鷹 · ${m[1]} 公尺`],
-  [/^Level (\d+): (\d+) minutes to find and take down Rex Starling, then (\d+) seconds to escape the police\.$/, m => `第 ${m[1]} 關：${m[2]} 分鐘內找到並解決雷克斯·星鷹，然後用 ${m[3]} 秒逃離警察。`],
+  [/^Level (\d+): (\d+) minutes to take down Rex Starling past his (\d+) bodyguards, then (\d+) seconds to escape the police\.$/, m => `第 ${m[1]} 關：${m[2]} 分鐘內突破 ${m[3]} 名保鑣解決雷克斯·星鷹，然後用 ${m[4]} 秒逃離警察。`], [/^(\d+) bodyguards protect him\. They attack if you get close or hurt him\.$/, m => `${m[1]} 名保鑣保護著他。你太靠近或傷到他，他們就會攻擊。`],
   [/^Rex Starling is down and you slipped away from the police\.(?: Level (\d+) is unlocked\.)?$/, m => `雷克斯·星鷹倒下了，你也成功擺脫了警察。${m[1] ? `第 ${m[1]} 關已解鎖。` : ''}`],
   [/^(.+) taken out\.$/, m => `${zl(m[1][0].toLowerCase() + m[1].slice(1))}被擊倒了。`],
   [/^A (.+) stepped on your caltrops\.$/, m => `${zl(m[1])}踩到你的鐵蒺藜了。`],
@@ -1844,7 +1863,7 @@ const ZHRE = [
   [/^You slipped into the (.+)\. Cameras can’t see you in here\.$/, m => `你溜進了${zl(m[1])}。攝影機看不到這裡。`],
   [/^Baton: (?:knocked one down|knocked (\d+) down)\.$/, m => m[1] ? `警棍：打倒了 ${m[1]} 人。` : '警棍：打倒了 1 人。'], [/^Bat: (?:knocked one back|knocked (\d+) back)\.$/, m => m[1] ? `球棒：擊退了 ${m[1]} 人。` : '球棒：擊退了 1 人。'],
   [/^Level (\d+)$/, m => `第 ${m[1]} 關`], [/^Level (\d+) complete$/, m => `第 ${m[1]} 關完成`], [/^Captured on level (\d+)$/, m => `在第 ${m[1]} 關被抓到`], [/^Start level (\d+)$/, m => `開始第 ${m[1]} 關`], [/^Start level (\d+) together$/, m => `一起開始第 ${m[1]} 關`], [/^Start level (\d+) on your own$/, m => `自己開始第 ${m[1]} 關`],
-  [/^Next level \((\d+) min\)$/, m => `下一關（${m[1]} 分鐘）`], [/^Level (\d+) is unlocked\.$/, m => `第 ${m[1]} 關已解鎖。`], [/^Time is up and The city never got its hands on you\. Level (\d+) is unlocked\.$/, m => `時間到，全城始終沒能抓到你。第 ${m[1]} 關已解鎖。`],
+  [/^Next level \((\d+) min\)$/, m => `下一關（${m[1]} 分鐘）`], [/^Level (\d+) is unlocked\.$/, m => `第 ${m[1]} 關已解鎖。`], [/^Time is up and the city never got its hands on you\. Level (\d+) is unlocked\.$/, m => `時間到，全城始終沒能抓到你。第 ${m[1]} 關已解鎖。`],
   [/^The city caught up with you after (.+)\.$/, m => `撐了 ${m[1]} 後，全城追上了你。`], [/^Get off at (.+)$/, m => `在${zl(m[1])}下車`],
   [/^Level (\d+): survive (\d+) minutes with (\d+) cameras watching( and more police than the level before)?\. Beat a level to unlock the next\.$/, m => `第 ${m[1]} 關：存活 ${m[2]} 分鐘，有 ${m[3]} 台攝影機監視${m[4] ? '，警察也比上一關更多' : ''}。通過一關即可解鎖下一關。`],
   [/^Level (\d+) · (\S+) left · health (\d+) · alert (\d+)% · (\d+) people taken out \((\d+) police\)$/, m => `第 ${m[1]} 關 · 剩餘 ${m[2]} · 生命 ${m[3]} · 警戒 ${m[4]}% · 已擊倒 ${m[5]} 人（警察 ${m[6]} 人）`],
@@ -1883,7 +1902,7 @@ function msg(text, cls = '') {
 let lastSpotMsg = -9;
 function spotMsg(text) { if (game.elapsed - lastSpotMsg < 2.5) return; lastSpotMsg = game.elapsed; msg(text, 'warn'); sfx.spot(); game.spotFlash = 1; game.spottedCount++; }
 function renderWeapons() {
-  $('weapons').innerHTML = WEAPONS.map((w, i) => `<div data-w="${i}" class="wslot ${player.have[i] ? 'have' : ''} ${player.w === i ? 'active' : ''}" style="--wc:#${WCOL[i].toString(16).padStart(6, '0')}"><span class="k">${w.key}</span><svg viewBox="0 0 32 32" aria-hidden="true">${WICON[i]}</svg><b>${zl(w.name)}</b><small>${tr(w.uses ? player.ammo[i] + ' left' : player.have[i] ? 'ready' : 'not found')}</small></div>`).join('');
+  $('weapons').innerHTML = WEAPONS.map((w, i) => `<div data-w="${i}" class="wslot ${player.have[i] ? 'have' : ''} ${player.w === i ? 'active' : ''}" style="--wc:#${WCOL[i].toString(16).padStart(6, '0')}"><span class="k">${w.key}</span><svg viewBox="0 0 32 32" aria-hidden="true">${WICON[i]}</svg><b>${LANG === 'zh' ? zl(w.name) : w.name}</b><small>${tr(w.uses ? player.ammo[i] + ' left' : player.have[i] ? 'ready' : 'not found')}</small></div>`).join('');
 }
 const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 function updateHud() {
@@ -1908,30 +1927,25 @@ const mmBase = document.createElement('canvas'); mmBase.width = 200; mmBase.heig
   g.strokeStyle = '#6a7078'; g.lineWidth = 1.2;
   for (const z of ZR) { g.beginPath(); g.moveTo(mx(-400), mz(z)); g.lineTo(mx(300), mz(z)); g.stroke(); }
   for (const x of XR) { const br = BRIDGES.includes(x); g.beginPath(); g.moveTo(mx(x), mz(-370)); g.lineTo(mx(x), mz(br ? 370 : -35)); g.stroke(); if (!br) { g.beginPath(); g.moveTo(mx(x), mz(35)); g.lineTo(mx(x), mz(370)); g.stroke(); } }
-  g.fillStyle = '#7d8289'; for (const s of solids) if (s.x1 - s.x0 > 5) g.fillRect(mx(s.x0), mz(s.z0), (s.x1 - s.x0) * MMS, (s.z1 - s.z0) * MMS);
+  // the elevated rail route, faint, so moving trains read against it
+  g.strokeStyle = 'rgba(120,170,255,0.45)'; g.lineWidth = 2; g.beginPath(); railC.getSpacedPoints(240).forEach((p, i) => i ? g.lineTo(mx(p.x), mz(p.z)) : g.moveTo(mx(p.x), mz(p.z))); g.stroke();
 }
 function drawMinimap() {
+  // only what matters while you run: police, police cars, Rex, trains, you and your friends
   mg.drawImage(mmBase, 0, 0);
-  for (const p of pickups) if (!p.gone) { mg.fillStyle = '#' + PK[p.kind].col.toString(16).padStart(6, '0'); mg.fillRect(mx(p.x) - 1.5, mz(p.z) - 1.5, 3, 3); }
-  for (const c of cams) {
-    mg.fillStyle = c.alarm > 0 ? '#ff4a3d' : '#5fd6ff'; mg.beginPath(); mg.arc(mx(c.x), mz(c.z), 2, 0, 6.28); mg.fill();
-    mg.fillStyle = c.alarm > 0 ? 'rgba(255,74,61,0.35)' : 'rgba(95,214,255,0.22)'; mg.beginPath(); mg.moveTo(mx(c.x), mz(c.z));
-    const a = Math.atan2(Math.sin(c.yaw), Math.cos(c.yaw)); mg.arc(mx(c.x), mz(c.z), c.range * MMS, Math.PI / 2 - a - 0.38, Math.PI / 2 - a + 0.38); mg.closePath(); mg.fill();
-  }
-  for (const n of npcs) if (n.t === 'cop' && !n.out) { const d = Math.hypot(n.x - player.x, n.z - player.z); if (d < 110 || n.state === 'chase') { mg.fillStyle = n.stun > 0 ? '#8a3a3a' : n.state === 'chase' ? '#ff4a3d' : '#ff9a8a'; mg.beginPath(); mg.arc(mx(n.x), mz(n.z), 2, 0, 6.28); mg.fill(); } }
-  for (const dr of doors) { mg.fillStyle = dr.room.kind === 'metro' ? '#4f8dff' : '#ffd9a0'; mg.fillRect(mx(dr.fx) - 1.5, mz(dr.fz) - 1.5, 3, 3); }
-  for (const g of mp.ghosts.values()) if (g.grp.visible) { mg.fillStyle = g.col; mg.beginPath(); mg.arc(mx(g.x), mz(g.z), 3, 0, 6.28); mg.fill(); mg.strokeStyle = '#fff'; mg.lineWidth = 1; mg.stroke(); }
-  STOPS.forEach((st, k) => { const X = mx(st.ex), Z = mz(st.ez), near = k === nearestStop; mg.fillStyle = near ? '#ffd24a' : '#2f7bff'; mg.beginPath(); mg.arc(X, Z, 6.5, 0, 6.28); mg.fill(); mg.strokeStyle = '#fff'; mg.lineWidth = 1.5; mg.stroke(); mg.fillStyle = '#fff'; mg.font = '700 9px system-ui, sans-serif'; mg.textAlign = 'center'; mg.textBaseline = 'middle'; mg.fillText('T', X, Z + 0.5); });
-  for (const pc of pcars) { mg.fillStyle = pc.mode === 'patrol' ? '#9fb6ff' : (game.elapsed * 4 | 0) % 2 ? '#ff4a3d' : '#4f7dff'; mg.fillRect(mx(pc.x) - 2.5, mz(pc.z) - 2.5, 5, 5); }
-  const lk = streetPos(game.lastKnown);
-  if (lk && game.alert > 5) { mg.strokeStyle = 'rgba(255,255,255,0.8)'; mg.lineWidth = 1.2; mg.beginPath(); mg.arc(mx(lk.x), mz(lk.z), 4 + 2 * Math.sin(game.elapsed * 4), 0, 6.28); mg.stroke(); }
-  if (heliS.active) { mg.fillStyle = '#fff4d6'; mg.fillRect(mx(heliS.px) - 3, mz(heliS.pz) - 1, 6, 2); mg.fillRect(mx(heliS.px) - 1, mz(heliS.pz) - 3, 2, 6); }
-  if (gmode === 'hunt' && hunt.phase === 'hunt' && hunt.celeb) { const c = hunt.celeb, X = mx(c.x), Z = mz(c.z), r = 6 + 2 * Math.sin(game.elapsed * 5); mg.fillStyle = 'rgba(255,210,74,0.3)'; mg.beginPath(); mg.arc(X, Z, r + 3, 0, 6.28); mg.fill(); mg.strokeStyle = '#ffd24a'; mg.lineWidth = 2; mg.beginPath(); mg.arc(X, Z, r, 0, 6.28); mg.stroke(); mg.fillStyle = '#fff4b0'; mg.beginPath(); mg.moveTo(X, Z - 4); mg.lineTo(X + 4, Z); mg.lineTo(X, Z + 4); mg.lineTo(X - 4, Z); mg.closePath(); mg.fill(); }
-  const pp = player.room ? { x: player.door.fx, z: player.door.fz } : player;
-  mg.fillStyle = '#e8742a'; mg.beginPath(); mg.arc(mx(pp.x), mz(pp.z), 3, 0, 6.28); mg.fill();
-  if (player.room) { mg.strokeStyle = '#e8742a'; mg.lineWidth = 1.5; mg.beginPath(); mg.arc(mx(pp.x), mz(pp.z), 6, 0, 6.28); mg.stroke(); }
-  else { mg.strokeStyle = '#e8742a'; mg.lineWidth = 1.5; mg.beginPath(); mg.moveTo(mx(pp.x), mz(pp.z)); mg.lineTo(mx(pp.x) + Math.sin(camYaw) * 8, mz(pp.z) + Math.cos(camYaw) * 8); mg.stroke(); }
+  const blink = (game.elapsed * 4 | 0) % 2;
+  STOPS.forEach((st, k) => { const X = mx(st.ex), Z = mz(st.ez), near = k === nearestStop; mg.fillStyle = near ? '#ffd24a' : '#2f7bff'; mg.beginPath(); mg.arc(X, Z, 5.5, 0, 6.28); mg.fill(); mg.strokeStyle = '#fff'; mg.lineWidth = 1.2; mg.stroke(); mg.fillStyle = near ? '#1a1406' : '#fff'; mg.font = '700 8px system-ui, sans-serif'; mg.textAlign = 'center'; mg.textBaseline = 'middle'; mg.fillText('T', X, Z + 0.5); });
+  for (const tn of trains) { mg.strokeStyle = '#4f9dff'; mg.lineWidth = 4.5; mg.lineCap = 'round'; mg.beginPath(); tn.cars.forEach((c, i) => { const p = c.position; i ? mg.lineTo(mx(p.x), mz(p.z)) : mg.moveTo(mx(p.x), mz(p.z)); }); mg.stroke(); mg.strokeStyle = '#d8e8ff'; mg.lineWidth = 1.5; mg.stroke(); mg.lineCap = 'butt'; }
+  for (const n of npcs) if (n.t === 'cop' && !n.out && n.x < 1500) { const ch = n.state === 'chase' && n.stun <= 0; mg.fillStyle = n.stun > 0 ? '#7a4a4a' : ch ? '#ff3b30' : '#ff8f84'; mg.beginPath(); mg.arc(mx(n.x), mz(n.z), ch ? 2.6 : 1.8, 0, 6.28); mg.fill(); }
+  for (const pc of pcars) { const X = mx(pc.x), Z = mz(pc.z); mg.fillStyle = pc.mode === 'patrol' ? '#3d6dff' : blink ? '#ff3b30' : '#3d6dff'; mg.fillRect(X - 3.5, Z - 3.5, 7, 7); mg.strokeStyle = '#fff'; mg.lineWidth = 1.2; mg.strokeRect(X - 3.5, Z - 3.5, 7, 7); }
+  for (const g of mp.ghosts.values()) if (g.grp.visible) { mg.fillStyle = g.col; mg.beginPath(); mg.arc(mx(g.x), mz(g.z), 3.2, 0, 6.28); mg.fill(); mg.strokeStyle = '#fff'; mg.lineWidth = 1; mg.stroke(); }
+  if (gmode === 'hunt' && hunt.phase === 'hunt' && hunt.celeb && !hunt.celeb.out) { const c = hunt.celeb, X = mx(c.x), Z = mz(c.z), r = 6 + 2 * Math.sin(game.elapsed * 5); mg.fillStyle = 'rgba(255,210,74,0.3)'; mg.beginPath(); mg.arc(X, Z, r + 3, 0, 6.28); mg.fill(); mg.strokeStyle = '#ffd24a'; mg.lineWidth = 2; mg.beginPath(); mg.arc(X, Z, r, 0, 6.28); mg.stroke(); mg.fillStyle = '#fff4b0'; mg.beginPath(); mg.moveTo(X, Z - 4.5); mg.lineTo(X + 4.5, Z); mg.lineTo(X, Z + 4.5); mg.lineTo(X - 4.5, Z); mg.closePath(); mg.fill(); }
+  const pp = player.room ? { x: player.door.fx, z: player.door.fz } : player, X = mx(pp.x), Z = mz(pp.z);
+  if (player.room) { mg.fillStyle = '#ff9a3c'; mg.beginPath(); mg.arc(X, Z, 3.5, 0, 6.28); mg.fill(); mg.strokeStyle = '#ff9a3c'; mg.lineWidth = 1.5; mg.beginPath(); mg.arc(X, Z, 6.5, 0, 6.28); mg.stroke(); }
+  else { const sx = Math.sin(camYaw), sz = Math.cos(camYaw); mg.fillStyle = '#ff9a3c'; mg.strokeStyle = '#fff'; mg.lineWidth = 1.2; mg.beginPath(); mg.moveTo(X + sx * 7, Z + sz * 7); mg.lineTo(X - sx * 4 + sz * 4.5, Z - sz * 4 - sx * 4.5); mg.lineTo(X - sx * 2, Z - sz * 2); mg.lineTo(X - sx * 4 - sz * 4.5, Z - sz * 4 + sx * 4.5); mg.closePath(); mg.fill(); mg.stroke(); }
+  if (mmLegendRex !== (gmode === 'hunt')) { mmLegendRex = gmode === 'hunt'; $('lgRex').style.display = mmLegendRex ? '' : 'none'; }
 }
+let mmLegendRex = null;
 
 // ---------- perception + alert ----------
 function playerVisibleFrom(x, z, range, facingYaw, fov) {
@@ -1961,6 +1975,7 @@ function updateNpc(n, dt) {
   }
   if (n.stun > 0) { n.stun -= dt; n.fallF = Math.min(1, n.fallF + dt * 4); if (n.stun <= 0) { n.state = 'walk'; n.node = nearestNode(n.x, n.z); n.tgt = null; } return; }
   n.fallF = Math.max(0, n.fallF - dt * 3);
+  if (n.guard) { updateGuard(n, dt); return; }
   if (n.x > 1500 && n.state === 'chase' && player.room !== roomAt(n.x)) {
     // you left: police inside find their way out within a few seconds even if furniture is in the way
     n.inT = (n.inT || 0) + dt;
@@ -2133,6 +2148,8 @@ function updatePlayer(dt) {
   }
 }
 function stunNpc(n, t, dmg) {
+  if (n.guard) t *= 0.5; // trained guards get back up faster
+  if (gmode === 'hunt' && (n.guard || n.celeb) && hunt.guards.length) provokeGuards();
   spawnSparks(n.x, PL + 1.1, n.z, fxCol, n.hp - dmg <= 0 ? 20 : 11, 4.2);
   n.hp -= dmg; n.goal = null; sfx.stun();
   if (n.hp <= 0) {
@@ -2467,8 +2484,8 @@ function setGameClip(on, force) {
 }
 function startGame() {
   audioInit(); gmode = selMode; resetGame(); setTouchSprint(false); touch.crouch = false; $('tCrouch').classList.remove('on'); game.state = 'playing'; setPlayingClass(true); setGameClip(true); game.camSnap = true; controls.enabled = false; controls.autoRotate = false; pm.visible = true;
-  showOverlay(null); lockPointer();
-  if (gmode === 'hunt') msg('The Hunt: find Rex Starling, the glowing celebrity, and take him out. The police leave you alone until he falls.', 'good');
+  showOverlay(null); lockPointer(); mpSpawnNearFriend();
+  if (gmode === 'hunt') { msg('The Hunt: find Rex Starling, the glowing celebrity, and take him out. The police leave you alone until he falls.', 'good'); msg(`${hunt.guards.length} bodyguards protect him. They attack if you get close or hurt him.`, 'warn'); }
   else msg(`Level ${level}: survive for ${level * 5} minutes. Stay out of the camera beams.`, 'good');
 }
 // Mouse stays captured for the whole game. Only Esc (the browser's own release key) frees it; that also pauses.
@@ -2488,7 +2505,7 @@ function endGame(win, why) {
   $('btnNext').style.display = win && level < MAX_LEVEL ? '' : 'none'; $('btnNext').textContent = tr(H ? 'Next contract' : `Next level (${(level + 1) * 5} min)`);
   $('btnAgain').textContent = tr(win ? 'Replay level' : 'Try again'); $('btnAgain').classList.toggle('primary', !(win && level < MAX_LEVEL));
   renderLevels();
-  $('overText').textContent = tr(H ? (win ? `Rex Starling is down and you slipped away from the police.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}` : why === 'time' ? 'Time ran out and the celebrity got away.' : 'The police got to you before you could escape.') : win ? (level >= MAX_LEVEL ? 'You beat every level. The city never got its hands on you.' : `Time is up and The city never got its hands on you.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}`) : `The city caught up with you after ${fmt(game.elapsed)}.`);
+  $('overText').textContent = tr(H ? (win ? `Rex Starling is down and you slipped away from the police.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}` : why === 'time' ? 'Time ran out and the celebrity got away.' : 'The police got to you before you could escape.') : win ? (level >= MAX_LEVEL ? 'You beat every level. The city never got its hands on you.' : `Time is up and the city never got its hands on you.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}`) : `The city caught up with you after ${fmt(game.elapsed)}.`);
   $('overStats').innerHTML = [[fmt(game.elapsed), 'Time survived'], [game.spottedCount, 'Times spotted'], [game.takenOut, 'People taken out'], [game.copsOut, 'Police taken out'], [Math.round(game.alert) + '%', 'Final alert']].map(([b, s]) => `<div><b>${b}</b><span>${tr(s)}</span></div>`).join('');
   if (sirenGain && AC) sirenGain.gain.setTargetAtTime(0, AC.currentTime, 0.2);
 }
@@ -2514,13 +2531,13 @@ function renderLevels() {
   for (let L = 1; L <= MAX_LEVEL; L++) { const b = document.createElement('button'); b.type = 'button'; b.textContent = L > unlocked ? '\uD83D\uDD12' : String(L); b.disabled = L > unlocked; b.setAttribute('aria-pressed', String(L === level)); b.setAttribute('aria-label', `Level ${L}, ${L * 5} minutes${L > unlocked ? ', locked' : ''}`); b.addEventListener('click', () => { level = L; renderLevels(); }); row.appendChild(b); }
   const c = levelCfg(level);
   renderModes();
-  if (selMode === 'hunt') { $('levelInfo').textContent = tr(`Level ${level}: ${huntMinutes(level)} minutes to find and take down Rex Starling, then ${huntEscapeSecs(level)} seconds to escape the police.`); $('btnStart').textContent = tr(`Start level ${level}`); return; }
+  if (selMode === 'hunt') { $('levelInfo').textContent = tr(`Level ${level}: ${huntMinutes(level)} minutes to take down Rex Starling past his ${guardCfg(level).n} bodyguards, then ${huntEscapeSecs(level)} seconds to escape the police.`); $('btnStart').textContent = tr(`Start level ${level}`); return; }
   $('levelInfo').textContent = tr(`Level ${level}: survive ${level * 5} minutes with ${c.cams} cameras watching${level > 1 ? ' and more police than the level before' : ''}. Beat a level to unlock the next.`);
   $('btnStart').textContent = tr(`Start level ${level}`);
 }
 function renderModes() {
   document.querySelectorAll('[data-gm]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.gm === selMode)));
-  $('modeInfo').textContent = tr(selMode === 'hunt' ? 'The Hunt: you are an assassin. Find the glowing celebrity Rex Starling and take him out. The police ignore you until he falls, then the whole city comes for you.' : 'Manhunt: the whole city hunts you. Survive the clock.');
+  $('modeInfo').textContent = tr(selMode === 'hunt' ? 'The Hunt: you are an assassin. Find the glowing celebrity Rex Starling and take him out. His bodyguards fight back, and there are more of them on higher levels. The police ignore you until he falls, then the whole city comes for you.' : 'Manhunt: the whole city hunts you. Survive the clock.');
 }
 document.querySelectorAll('[data-gm]').forEach(b => b.addEventListener('click', () => { selMode = b.dataset.gm === 'hunt' ? 'hunt' : 'manhunt'; try { localStorage.setItem('portAlderMode', selMode); } catch (e) {} renderLevels(); }));
 renderLevels();
@@ -2857,7 +2874,7 @@ function useAction() { if (game.state !== 'playing') return; const a = currentAc
 // Every player runs their own city and their own police; positions, vehicles and status travel between players.
 // =====================================================================
 const MP_COLS = ['#e8742a', '#3fb6ff', '#7ee07a', '#ff6fb0'];
-const mp = { on: false, code: '', host: false, nick: '', col: 0, peers: new Map(), net: null, lastGo: 0, ghosts: new Map(), myId: Math.random().toString(36).slice(2, 10) };
+const mp = { on: false, code: '', host: false, nick: '', col: 0, peers: new Map(), net: null, lastGo: 0, tok: 0, kind: '', err: '', joinT: 0, discT: 0, lobbyT: 0, ghosts: new Map(), myId: Math.random().toString(36).slice(2, 10) };
 try { mp.nick = (localStorage.getItem('portAlderNick') || '').slice(0, 16); } catch (e) {}
 const cleanNick = s => String(s || '').replace(/[^\p{L}\p{N} _.-]/gu, '').trim().slice(0, 16);
 const cleanCode = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
@@ -2866,9 +2883,11 @@ async function roomTransport(code) {
   if (!window.claude || !window.claude.use) return null;
   const room = await window.claude.use('room'); if (!room) return null;
   const r = await room.join('pa-' + code.toLowerCase());
+  let errFn = () => {};
   return {
-    kind: 'room', presence: p => r.presence(p).catch(() => {}),
-    onPeers: fn => r.onPeers(ch => fn(ch.peers.filter(p => !p.sameTab && p.kind === 'viewer').map(p => ({ id: p.peer, ...p.presence })))),
+    kind: 'room', presence: p => r.presence(p).catch(e => errFn(e)),
+    onPeers: fn => r.onPeers(ch => fn(ch.peers.filter(p => !p.sameTab && p.kind === 'viewer').map(p => ({ id: p.peer, ...p.presence }))), e => errFn(e)),
+    onError: fn => { errFn = fn; }, connected: () => { try { return r.connected(); } catch (e) { return true; } },
     leave: () => r.leave().catch(() => {}),
   };
 }
@@ -2878,42 +2897,66 @@ function loadPeerJs() {
 }
 async function peerTransport(code, host) {
   await loadPeerJs();
-  const hostId = 'port-alder-mh-' + code.toLowerCase(); let mine = {}, cb = () => {}, others = new Map(), conns = [], toHost = null;
+  const hostId = 'port-alder-mh-' + code.toLowerCase(); let mine = {}, cb = () => {}, others = new Map(), conns = [], toHost = null, errFn = () => {}, dead = false, tick = 0, seen = new Map(), hostSeen = Date.now(), hostGone = false, lastTick = Date.now();
   const peer = new window.Peer(host ? hostId : undefined);
-  await new Promise((res, rej) => { peer.on('open', res); peer.on('error', e => rej(e)); setTimeout(() => rej(new Error('timeout')), 12000); });
+  try { await new Promise((res, rej) => { peer.on('open', res); peer.on('error', e => rej(e)); setTimeout(() => rej(new Error('timeout')), 12000); }); } catch (e) { try { peer.destroy(); } catch (x) {} throw e; }
   const emitAll = () => cb([...others.entries()].map(([id, p]) => ({ id, ...p })));
   if (host) {
     peer.on('connection', c => {
       if (conns.length >= 3) { c.on('open', () => c.close()); return; }
-      conns.push(c);
-      c.on('data', d => { if (d && d.p) { others.set(c.peer, d.p); emitAll(); } });
+      conns.push(c); seen.set(c.peer, Date.now() + 14000); // a new friend gets 20 s to finish connecting
+      c.on('data', d => { if (d && d.p) { seen.set(c.peer, Date.now()); others.set(c.peer, d.p); emitAll(); } });
       c.on('close', () => { conns = conns.filter(x => x !== c); others.delete(c.peer); emitAll(); });
     });
-    setInterval(() => { const all = { [peer.id]: mine }; for (const [id, p] of others) all[id] = p; for (const c of conns) if (c.open) c.send({ all }); }, 100);
+    tick = setInterval(() => {
+      const now = Date.now();
+      // if this page itself froze for a moment (loading a level, a slow frame), nobody else's silence counts
+      if (now - lastTick > 1500) for (const [k, t] of seen) seen.set(k, Math.max(t, now)); lastTick = now;
+      // a friend whose tab closed or crashed may never send a goodbye: drop anyone silent for 15 s
+      for (const c of [...conns]) if (now - (seen.get(c.peer) ?? now) > 15000) { try { c.close(); } catch (e) {} conns = conns.filter(x => x !== c); others.delete(c.peer); seen.delete(c.peer); emitAll(); }
+      const all = { [peer.id]: mine }; for (const [id, p] of others) all[id] = p; for (const c of conns) if (c.open) { try { c.send({ all }); } catch (e) {} }
+    }, 100);
   } else {
     toHost = peer.connect(hostId, { reliable: false });
-    await new Promise((res, rej) => { toHost.on('open', res); toHost.on('error', rej); peer.on('error', rej); setTimeout(() => rej(new Error('no host')), 12000); });
-    toHost.on('data', d => { if (d && d.all) { others = new Map(Object.entries(d.all).filter(([id]) => id !== peer.id)); emitAll(); } });
-    toHost.on('close', () => { others.clear(); emitAll(); msg('The host left the room.', 'warn'); });
-    setInterval(() => { if (toHost.open) toHost.send({ p: mine }); }, 100);
+    try { await new Promise((res, rej) => { toHost.on('open', res); toHost.on('error', rej); peer.on('error', rej); setTimeout(() => rej(new Error('no host')), 20000); }); } catch (e) { try { peer.destroy(); } catch (x) {} throw e; }
+    const hostLeft = () => { if (hostGone || dead) return; hostGone = true; others.clear(); emitAll(); msg('The host left the room.', 'warn'); errFn({ type: 'host-left' }); };
+    toHost.on('data', d => { if (d && d.all) { hostSeen = Date.now(); if (hostGone && !dead && toHost.open) { hostGone = false; msg('Reconnected to the host.', 'good'); errFn({ type: 'ok' }); } others = new Map(Object.entries(d.all).filter(([id]) => id !== peer.id)); emitAll(); } });
+    toHost.on('close', hostLeft);
+    tick = setInterval(() => { const now = Date.now(); if (now - lastTick > 1500) hostSeen = Math.max(hostSeen, now); lastTick = now; if (now - hostSeen > 15000) hostLeft(); if (toHost.open) { try { toHost.send({ p: mine }); } catch (e) {} } }, 100);
   }
-  return { kind: 'peer', presence: p => { mine = { ...mine, ...p }; }, onPeers: fn => { cb = fn; }, leave: () => { try { peer.destroy(); } catch (e) {} } };
+  peer.on('disconnected', () => { if (!dead) { try { peer.reconnect(); } catch (e) {} } });
+  peer.on('error', e => { if (!dead && e && !['peer-unavailable', 'disconnected', 'network'].includes(e.type)) errFn(e); });
+  return { kind: 'peer', presence: p => { mine = { ...mine, ...p }; }, onPeers: fn => { cb = fn; }, onError: fn => { errFn = fn; }, connected: () => !peer.disconnected && (host || !!(toHost && toHost.open)), leave: () => { dead = true; clearInterval(tick); try { peer.destroy(); } catch (e) {} } };
 }
 // --- lobby ---
 async function mpJoin(code, host) {
   code = cleanCode(code); if (code.length < 4) { mpStatus('Room codes are 4 to 6 letters or numbers.'); return; }
   const nick = cleanNick($('mpNick').value) || 'Player'; mp.nick = nick; try { localStorage.setItem('portAlderNick', nick); } catch (e) {}
-  mpLeave(); mpStatus('Connecting…');
-  let net = null;
-  try { net = await roomTransport(code); } catch (e) { net = null; }
-  if (!net) { try { net = await peerTransport(code, host); } catch (e) { mpStatus(host ? 'Could not open a room here. Check your internet connection and try again.' : 'Could not find that room. Check the code and that your friend has created it.'); return; } }
-  mp.net = net; mp.on = true; mp.code = code; mp.host = host; mp.peers.clear();
+  mpLeave(); mpStatus('Connecting…'); const tok = ++mp.tok;
+  let net = null, why = ''; const onClaude = !!(window.claude && window.claude.use), ec = e => String((e && (e.code || e.type || e.message)) || e || 'error').slice(0, 40);
+  try { net = await roomTransport(code); if (!net && onClaude) why = 'room unavailable'; } catch (e) { why = ec(e); net = null; }
+  if (tok !== mp.tok) { if (net) net.leave(); return; }
+  if (!net) {
+    try { net = await peerTransport(code, host); } catch (e) {
+      const c = ec(e), dbg = `(${why ? why + ', ' : ''}${c})`;
+      if (tok !== mp.tok) return;
+      mpStatus(onClaude ? ['Online play could not connect on this page.', 'Every player has to be signed in to claude.ai and have this game shared with them. Otherwise play from the web link version.', dbg]
+        : c === 'peer-unavailable' || c === 'no host' ? ['Could not find that room. Check the code and that your friend has created it.', dbg]
+        : c === 'unavailable-id' ? ['That room code is already taken. Press Create room again for a new one.', dbg]
+        : ['Could not reach the online play service. Check your internet connection and try again.', dbg], true);
+      return;
+    }
+    if (tok !== mp.tok) { net.leave(); return; }
+  }
+  mp.net = net; mp.on = true; mp.code = code; mp.host = host; mp.peers.clear(); mp.kind = net.kind; mp.err = ''; mp.joinT = performance.now(); mp.discT = 0;
+  net.onError(e => { if (ec(e) === 'ok') { mp.err = ''; renderLobby(); return; } mp.err = ec(e); renderLobby(); if (game.state === 'playing' && mp.err !== 'host-left') msg('Online connection problem. Your friends may not see you.', 'warn'); });
   net.onPeers(list => { mp.peers = new Map(list.filter(p => p && p.pid && p.pid !== mp.myId).slice(0, 3).map(p => [p.pid, p])); mpWatchGo(); renderLobby(); });
   mpSend(true); renderLobby();
 }
-function mpLeave() { if (mp.net) mp.net.leave(); mp.net = null; mp.on = false; mp.peers.clear(); for (const g of mp.ghosts.values()) scene.remove(g.grp); mp.ghosts.clear(); renderLobby(); }
+function mpLeave() { mp.tok++; if (mp.net) mp.net.leave(); mp.net = null; mp.on = false; mp.peers.clear(); for (const g of mp.ghosts.values()) scene.remove(g.grp); mp.ghosts.clear(); renderLobby(); }
 let mpStatusEn = '';
-function mpStatus(t) { mpStatusEn = t; const el = $('mpStatus'); if (el) el.textContent = tr(t); }
+let mpStatusBad = false;
+function mpStatus(t, bad) { if (bad !== undefined || t !== mpStatusEn) mpStatusBad = !!bad; mpStatusEn = t; const el = $('mpStatus'); if (el) { el.textContent = (Array.isArray(t) ? t : [t]).map(tr).join(' '); el.classList.toggle('bad', mpStatusBad); } }
 function mpColorIdx() { // the host is colour 0, everyone else in a fixed order every page agrees on
   const all = [{ pid: mp.myId, host: mp.host }, ...mp.peers.values()].sort((a, b) => (b.host ? 1 : 0) - (a.host ? 1 : 0) || (a.pid < b.pid ? -1 : 1));
   return Math.max(0, all.findIndex(p => p.pid === mp.myId)) % 4;
@@ -2933,6 +2976,12 @@ function mpWatchGo() {
   const h = [...mp.peers.values()].find(p => p.host);
   if (h && h.go && h.go !== mp.lastGo) { const first = !mp.lastGo; mp.lastGo = h.go; if (!first || Date.now() - h.go < 15000) { level = clamp(h.goLvl | 0, 1, MAX_LEVEL); selMode = h.gm === 'hunt' ? 'hunt' : 'manhunt'; if (level > unlocked) { unlocked = level; } renderLevels(); startGame(); msg('The host started the hunt. Good luck!', 'good'); } }
 }
+function mpSpawnNearFriend() {
+  if (!mp.on) return;
+  const ps = [...mp.peers.values()].filter(p => p.st === 'playing' && typeof p.x === 'number' && typeof p.z === 'number' && p.x < 1500);
+  const f = ps.find(p => p.host) || ps[0]; if (!f) return;
+  for (let k = 0; k < 24; k++) { const a = k * 0.9, r = 2.5 + (k >> 3) * 1.5, x = f.x + Math.sin(a) * r, z = f.z + Math.cos(a) * r; if (!inSolid(x, G + 1, z, 0.6)) { player.x = x; player.z = z; game.camSnap = true; msg('You start next to your friends.', 'good'); return; } }
+}
 function mpStartTogether() { if (!mp.on || !mp.host) return; mp.lastGo = Date.now(); startGame(); mpSend(true); }
 function renderLobby() {
   const box = $('mpBox'); if (!box) return;
@@ -2943,14 +2992,28 @@ function renderLobby() {
   const list = $('mpList'); list.innerHTML = '';
   for (const p of rows) { const li = document.createElement('li'); const dot = document.createElement('span'); dot.className = 'mpdot'; dot.style.background = MP_COLS[p.col | 0] || MP_COLS[0]; li.appendChild(dot); li.appendChild(document.createTextNode((cleanNick(p.nick) || tr('Player')) + (p.you ? tr(' (you)') : '') + (p.host ? tr(' · host') : ''))); list.appendChild(li); }
   $('btnStart').textContent = tr(mp.host ? `Start level ${level} together` : `Start level ${level} on your own`);
-  mpStatus(mp.host ? (mp.peers.size ? 'Everyone here starts when you press Start.' : 'Share the code with up to 3 friends. They open this same game and press Join.') : 'Waiting for the host to start. You can also play on your own meanwhile.');
+  const age = (performance.now() - mp.joinT) / 1000, hostHere = [...mp.peers.values()].some(p => p.host), lines = [];
+  let bad = false;
+  if (mp.err === 'host-left') { bad = true; lines.push('The host left the room.', 'Leave the room and join again when they are back.'); }
+  else if (mp.err) { bad = true; lines.push('Connection problem. Leave the room and join again.', `(${mp.err})`); }
+  else if (mp.discT > 5) { bad = true; lines.push('Connection lost. Trying to reconnect…'); }
+  else {
+    lines.push(mp.kind === 'room' ? 'Connected through claude.ai.' : 'Connected directly.');
+    if (mp.host) lines.push(mp.peers.size ? 'Everyone here starts when you press Start.' : 'Share the code with up to 3 friends. They open this same game and press Join.');
+    else if (hostHere) lines.push('Waiting for the host to start. You can also play on your own meanwhile.');
+    else if (age > 8) { bad = true; lines.push('Nobody has created this room yet. Check the code with your friend.'); }
+    else lines.push('Looking for the host…');
+    if (mp.host && !mp.peers.size && age > 25 && mp.kind === 'room') lines.push('On claude.ai your friends must be signed in and have this game shared with them.');
+  }
+  mpStatus(lines, bad);
 }
 // --- other players in your city ---
 const ghostBody = new THREE.BoxGeometry(0.62, 0.8, 0.36).translate(0, 1.2, 0), ghostHead = new THREE.BoxGeometry(0.34, 0.34, 0.34).translate(0, 1.82, 0), ghostLegs = new THREE.BoxGeometry(0.5, 0.8, 0.3).translate(0, 0.4, 0);
+const ghostBeam = new THREE.CylinderGeometry(0.4, 0.4, 150, 10, 1, true).translate(0, 78, 0);
 function nameTag(text, col) {
   const c = mk(256, 64), g = c.getContext('2d'); g.fillStyle = 'rgba(10,14,20,0.75)'; g.beginPath(); g.roundRect ? g.roundRect(4, 8, 248, 48, 22) : g.rect(4, 8, 248, 48); g.fill();
   g.fillStyle = col; g.font = '700 30px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 128, 33, 230);
-  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true })); s.scale.set(2.4, 0.6, 1); s.position.y = 2.6; s.renderOrder = 10; return s;
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true, fog: false })); s.scale.set(2.4, 0.6, 1); s.position.y = 2.6; s.renderOrder = 10; return s;
 }
 function ghostFor(id, p) {
   let g = mp.ghosts.get(id); const col = MP_COLS[p.col | 0] || MP_COLS[0], nick = cleanNick(p.nick) || 'Player';
@@ -2958,8 +3021,9 @@ function ghostFor(id, p) {
   if (!g) {
     const grp = new THREE.Group(), m = new THREE.MeshStandardMaterial({ color: col, roughness: 0.6, emissive: col, emissiveIntensity: 0.25 });
     const man = new THREE.Group(); man.add(new THREE.Mesh(ghostBody, m), new THREE.Mesh(ghostHead, new THREE.MeshStandardMaterial({ color: 0xdba77d })), new THREE.Mesh(ghostLegs, new THREE.MeshStandardMaterial({ color: 0x2a2f3a })));
-    grp.add(man, nameTag(nick, col)); scene.add(grp);
-    g = { grp, man, col, nick, x: p.x, z: p.z, yaw: p.yaw, vmesh: null, vkind: '' }; mp.ghosts.set(id, g);
+    const tag = nameTag(nick, col), beam = new THREE.Mesh(ghostBeam, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false })); beam.frustumCulled = false;
+    grp.add(man, tag, beam); scene.add(grp);
+    g = { grp, man, tag, beam, col, nick, x: p.x, z: p.z, yaw: p.yaw, vmesh: null, vkind: '' }; mp.ghosts.set(id, g);
   }
   return g;
 }
@@ -2970,8 +3034,9 @@ function updateGhosts(dt) {
     live.add(id); const g = ghostFor(id, p);
     const k = 1 - Math.exp(-dt * 10); g.x += (p.x - g.x) * k; g.z += (p.z - g.z) * k; g.yaw = lerpAngle(g.yaw, +p.yaw || 0, k);
     if (Math.hypot(p.x - g.x, p.z - g.z) > 30) { g.x = p.x; g.z = p.z; }
-    const show = p.st === 'playing' && !p.hide && (game.state === 'playing' || game.state === 'paused') && p.lvl === level;
+    const show = p.st === 'playing' && !p.hide && (game.state === 'playing' || game.state === 'paused');
     g.grp.visible = show;
+    { const pd = Math.hypot(g.x - player.x, g.z - player.z), ts = clamp(pd / 22, 1, 9); g.tag.scale.set(2.4 * ts, 0.6 * ts, 1); g.tag.position.y = 2.6 + (ts - 1) * 0.9; g.beam.visible = pd > 18; }
     const vk = p.veh === 'car' || p.veh === 'scooter' ? p.veh : '';
     if (vk !== g.vkind) { if (g.vmesh) scene.remove(g.vmesh); g.vmesh = vk ? vehicleMesh(vk, +p.vc || 0x888888) : null; g.vkind = vk; }
     if (g.vmesh) { g.vmesh.visible = show; g.vmesh.position.set(g.x, vk === 'car' ? G : PL, g.z); g.vmesh.rotation.y = g.yaw; }
@@ -2984,16 +3049,25 @@ function updateGhosts(dt) {
 function updateMp(dt) {
   if (!mp.on) return;
   mpSendT -= dt; if (mpSendT <= 0) { mpSendT = 0.1; mpSend(); }
+  if (mp.net && mp.net.connected) mp.discT = mp.net.connected() ? 0 : mp.discT + dt;
+  mp.lobbyT -= dt; if (mp.lobbyT <= 0) { mp.lobbyT = 2; if (game.state === 'menu') renderLobby(); }
   updateGhosts(dt);
 }
 function renderSquad() {
   const el = $('squad'); if (!el) return;
-  if (!mp.on || !mp.peers.size) { el.style.display = 'none'; return; }
+  if (!mp.on) { el.style.display = 'none'; return; }
   el.style.display = 'grid'; el.innerHTML = '';
+  const head = document.createElement('div'); head.className = 'label'; head.textContent = `${tr('Room')} ${mp.code} · ${mp.peers.size + 1}/4`; el.appendChild(head);
+  if (!mp.peers.size) { const row = document.createElement('div'); row.textContent = tr(mp.err || mp.discT > 5 ? 'Connection problem' : 'No friends connected yet'); el.appendChild(row); return; }
   for (const p of mp.peers.values()) {
     const row = document.createElement('div'), dot = document.createElement('span'); dot.className = 'mpdot'; dot.style.background = MP_COLS[p.col | 0] || MP_COLS[0];
     const status = p.st === 'playing' ? (p.hide ? 'hiding' : `${Math.max(0, p.hp | 0)} hp · alert ${p.al | 0}%`) : p.st === 'over' ? (p.res === 'win' ? 'escaped' : p.res === 'lose' ? 'captured' : 'finished') : p.st === 'paused' ? 'paused' : 'in menu';
-    row.appendChild(dot); row.appendChild(document.createTextNode(`${cleanNick(p.nick) || tr('Player')} · ${tr(status)}`)); el.appendChild(row);
+    row.appendChild(dot); row.appendChild(document.createTextNode(`${cleanNick(p.nick) || tr('Player')} · ${tr(status)}`));
+    if (p.st === 'playing' && typeof p.x === 'number' && p.x < 1500 && !player.room) {
+      const dx = p.x - player.x, dz = p.z - player.z; let rel = Math.atan2(dx, dz) - camYaw; while (rel > Math.PI) rel -= Math.PI * 2; while (rel < -Math.PI) rel += Math.PI * 2;
+      const ar = document.createElement('span'); ar.textContent = '▲'; ar.style.cssText = `display:inline-block;margin:0 4px 0 8px;transform:rotate(${(-rel).toFixed(2)}rad)`; row.appendChild(ar); row.appendChild(document.createTextNode(`${Math.round(Math.hypot(dx, dz))} m`));
+    }
+    el.appendChild(row);
   }
 }
 
@@ -3004,7 +3078,7 @@ const CELEB_NAME = 'Rex Starling';
 function huntMinutes(L) { return 4 + L; }
 function huntEscapeSecs(L) { return 60 + 10 * L; }
 function huntSetup() {
-  hunt.phase = gmode === 'hunt' ? 'hunt' : 'off'; hunt.celeb = null; hunt.t = 0; hunt.hintT = 0; hunt.downT = 0;
+  hunt.phase = gmode === 'hunt' ? 'hunt' : 'off'; hunt.celeb = null; hunt.guards = []; hunt.aggro = false; hunt.calmT = 0; hunt.t = 0; hunt.hintT = 0; hunt.downT = 0;
   $('targetHint').style.display = 'none'; if (hunt.fx) hunt.fx.visible = false;
   if (gmode !== 'hunt') return;
   game.timeLeft = GAME_TIME = huntMinutes(level) * 60;
@@ -3018,6 +3092,7 @@ function spawnCeleb() {
   const n = makeNpc('celeb', node); n.celeb = true; n.hp = 90; n.r = 0.45;
   npcs[i] = n; npcColors(n, i); for (const k of PART_KEYS) parts[k].instanceColor.needsUpdate = true;
   hunt.celeb = n;
+  spawnGuards(n, i);
   if (!hunt.fx) {
     const g = new THREE.Group();
     const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 170, 12, 1, true).translate(0, 85, 0), new THREE.MeshBasicMaterial({ color: 0xffd24a, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
@@ -3030,6 +3105,49 @@ function spawnCeleb() {
   }
   hunt.fx.visible = true; hunt.fx.position.set(n.x, PL, n.z);
 }
+function guardCfg(L) { return { n: Math.min(6, 2 + Math.floor(L / 2)), hp: 70 + 12 * L, dmg: 4 + 0.6 * L, atk: Math.max(0.6, 1.0 - 0.04 * L), run: Math.min(6.2, 5.0 + 0.12 * L), aggro: 9 + L }; }
+function spawnGuards(c, celebIdx) {
+  const cfg = guardCfg(level), used = new Set([celebIdx]);
+  for (let g = 0; g < cfg.n; g++) {
+    let i = -1; for (let k = 0; k < 400 && i < 0; k++) { const j = (Math.random() * npcs.length) | 0; if (!used.has(j) && npcs[j].t !== 'cop' && !npcs[j].out && !npcs[j].celeb) i = j; }
+    if (i < 0) break; used.add(i);
+    const n = makeNpc('guard', c.node); n.guard = true; n.hp = cfg.hp; n.gSlot = g; n.state = 'guard';
+    const a = g / cfg.n * Math.PI * 2; n.x = c.x + Math.sin(a) * 1.8; n.z = c.z + Math.cos(a) * 1.8; if (inSolid(n.x, G + 1, n.z, 0.4)) { n.x = c.x; n.z = c.z; }
+    npcs[i] = n; npcColors(n, i); hunt.guards.push(n);
+  }
+  for (const k of PART_KEYS) parts[k].instanceColor.needsUpdate = true;
+}
+function provokeGuards() {
+  if (hunt.aggro || !hunt.guards.some(g => !g.out)) return;
+  hunt.aggro = true; hunt.calmT = 0; msg('Rex Starling\u2019s bodyguards are coming for you!', 'warn'); sfx.spot();
+}
+function updateGuard(n, dt) {
+  const cfg = guardCfg(level), c = hunt.celeb, dx = player.x - n.x, dz = player.z - n.z, d = Math.hypot(dx, dz);
+  const canHit = hunt.aggro && !player.room && !player.ride && n.x < 1500 && !inSmoke(player.x, player.z);
+  let tx = n.x, tz = n.z, spd = 0, stop = 0.4;
+  if (canHit) { tx = player.x; tz = player.z; spd = cfg.run; stop = 0.9 + player.r; n.state = 'chase'; }
+  else {
+    n.state = 'guard';
+    if (c && !c.out) { const a = n.gSlot / Math.max(1, hunt.guards.length) * Math.PI * 2; tx = c.x + Math.sin(a) * 1.8; tz = c.z + Math.cos(a) * 1.8; const cd = Math.hypot(tx - n.x, tz - n.z); spd = cd > 4 || c.state === 'flee' ? cfg.run : TYPES.celeb.speed + 0.3; }
+  }
+  const gx = tx - n.x, gz = tz - n.z, gd = Math.hypot(gx, gz);
+  if (gd > stop && spd > 0) { const st = Math.min(gd - stop, spd * dt); moveCircle(n, gx / gd * st, gz / gd * st, n.r); n.moving = true; n.walkT += dt * (spd / 1.6); n.yaw = lerpAngle(n.yaw, Math.atan2(gx, gz), 0.2); }
+  else if (canHit) n.yaw = lerpAngle(n.yaw, Math.atan2(dx, dz), 0.3);
+  if (canHit && d < 1.9 + player.r) {
+    n.atk -= dt;
+    if (n.atk <= 0) { n.atk = cfg.atk; if (player.veh && Math.abs(player.veh.v) > 3) return; player.hp -= cfg.dmg; player.hurtT = 0; game.dmgFlash = 1; sfx.hit(); if (Math.random() < 0.25) msg('A bodyguard hits you! Fight back or run.', 'warn'); }
+  } else n.atk = Math.min(n.atk, 0.35);
+}
+function updateGuards(dt) {
+  if (!hunt.guards.length || !hunt.guards.some(g => !g.out)) return;
+  const c = hunt.celeb, cfg = guardCfg(level);
+  if (c && !c.out && !player.room && !player.ride && Math.hypot(player.x - c.x, player.z - c.z) < cfg.aggro && !inSmoke(player.x, player.z) && los(c.x, c.z, player.x, player.z)) provokeGuards();
+  if (hunt.aggro) {
+    let dmin = 1e9; for (const g of hunt.guards) if (!g.out) dmin = Math.min(dmin, Math.hypot(g.x - player.x, g.z - player.z));
+    hunt.calmT = dmin > 40 || player.room || player.ride ? hunt.calmT + dt : 0;
+    if (hunt.calmT > 5) { hunt.aggro = false; hunt.calmT = 0; msg('The bodyguards lost you and went back to Rex Starling.', 'good'); }
+  }
+}
 function celebDown(n) {
   if (hunt.phase !== 'hunt') return;
   hunt.phase = 'escape'; hunt.t = 0; hunt.downT = 0;
@@ -3041,6 +3159,7 @@ function celebDown(n) {
 }
 function updateHunt(dt) {
   if (gmode !== 'hunt') return;
+  updateGuards(dt);
   const c = hunt.celeb, fx = hunt.fx;
   if (hunt.phase === 'escape') { hunt.t += dt; hunt.downT += dt; if (fx) fx.visible = hunt.downT < 3; }
   if (!c || !fx) return;
@@ -3105,7 +3224,7 @@ function frame(now) {
 }
 applyQuality(qName);
 spawnPeople(); makePickups();
-window.__city = { camera, controls, applyMode, applyQuality, frame, setT: v => { T = v; } };
+window.__city = { scene, renderer, camera, controls, applyMode, applyQuality, frame, setT: v => { T = v; } };
 window.__game = { hunt, setSel: m => { selMode = m; renderLevels(); }, get gmode() { return gmode; }, setLang, tr, mp, mpJoin, mpLeave, updateGhosts, updateTrains, vehicles, pcars, STOPS, trains, cars, scoots, useAction, currentAction, enterVehicle, exitVehicle, nearestRide, boardTrain, get level() { return level; }, setLevel: L => { level = L; }, get unlocked() { return unlocked; }, endGame, allCams, doors, rooms, enterDoor, exitRoom, inSolid, inTree, updateCamera, setPitch: v => { camPitch = v; }, solids, game, player, npcs, cams, start: startGame, step: stepGame, pause: pauseGame, resume: resumeGame, heliS, setPlayer: (x, z) => { player.x = x; player.z = z; }, setYaw: y => { camYaw = y; }, keys, attack, pickups, smokes };
 document.querySelectorAll('.langBtn').forEach(b => b.addEventListener('click', () => setLang(LANG === 'zh' ? 'en' : 'zh')));
 $('mpNick').value = mp.nick;
