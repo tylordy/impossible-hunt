@@ -167,11 +167,87 @@
   body.touch #cross { display: none; }
   body.touch .card { padding: 18px 18px; gap: 12px; }
   body.touch .card h1 { font-size: 28px; order: -2; }
-  body.touch #menu #startRow { order: -1; }
   body.touch .card p, body.touch .rules div { font-size: 13px; }
-  @media (orientation: portrait) { body.touch.playing #rotateHint { display: block; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(170px + env(safe-area-inset-bottom, 0px)); z-index: 6; background: var(--hud-bg); border: 1px solid var(--hud-line); border-radius: 999px; padding: 5px 12px; font-size: 12px; color: var(--hud-dim); pointer-events: none; white-space: nowrap; } }
+  @media (orientation: portrait) { body.touch.playing #rotateHint { display: block; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(170px + env(safe-area-inset-bottom, 0px)); z-index: 6; background: var(--hud-bg); border: 1px solid var(--hud-line); border-radius: 999px; padding: 5px 12px; font-size: 12px; color: var(--hud-dim); pointer-events: none; white-space: nowrap; animation: hintAway 6s forwards; } }
+  @keyframes hintAway { 0%, 80% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
   @media (max-height: 430px) { body.touch #minimap { width: 96px; height: 101px; top: calc(96px + env(safe-area-inset-top, 0px)); } body.touch #vitals, body.touch #alertPanel { width: 132px; } }
   @media (prefers-reduced-motion: reduce) { #feed div, .bar i { transition: none; } }
+  /* ---- touch layout fixes ---- */
+  body.touch #mmLegend { display: none; }
+  body.touch #feed { width: min(420px, 56vw); }
+  body.touch #targetHint { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+  body.touch #stopHint { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  body.touch #weapons { max-width: calc(100vw - 16px); flex-wrap: wrap; justify-content: center; }
+  /* phone held upright: stack the panels and keep the thumbs' corners clear */
+  @media (orientation: portrait) {
+    body.touch #timer { top: calc(4px + env(safe-area-inset-top, 0px)); font-size: 20px; padding: 0 8px; }
+    body.touch #vitals { top: calc(46px + env(safe-area-inset-top, 0px)); left: 8px; width: calc(50vw - 14px); }
+    body.touch #alertPanel { top: calc(46px + env(safe-area-inset-top, 0px)); right: 8px; width: calc(50vw - 14px); }
+    body.touch #minimap { top: calc(150px + env(safe-area-inset-top, 0px)); right: 8px; width: 104px; height: 109px; }
+    body.touch #squad { top: calc(150px + env(safe-area-inset-top, 0px)); left: 8px; }
+    body.touch #feed { top: calc(266px + env(safe-area-inset-top, 0px)); width: calc(100vw - 24px); }
+    body.touch #targetHint { bottom: calc(318px + env(safe-area-inset-bottom, 0px)); }
+    body.touch #stopHint { bottom: calc(288px + env(safe-area-inset-bottom, 0px)); }
+    body.touch #prompt { top: auto; bottom: calc(350px + env(safe-area-inset-bottom, 0px)); }
+    #tAttack { width: 80px; height: 80px; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+    #tSprint { width: 58px; height: 58px; right: calc(108px + env(safe-area-inset-right, 0px)); bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+    #tCrouch { width: 58px; height: 58px; right: calc(108px + env(safe-area-inset-right, 0px)); bottom: calc(164px + env(safe-area-inset-bottom, 0px)); }
+    #tNext { width: 52px; height: 52px; right: calc(30px + env(safe-area-inset-right, 0px)); bottom: calc(192px + env(safe-area-inset-bottom, 0px)); }
+    #tUse { right: calc(70px + env(safe-area-inset-right, 0px)); bottom: calc(232px + env(safe-area-inset-bottom, 0px)); }
+    body.touch.playing #rotateHint { bottom: auto; top: calc(276px + env(safe-area-inset-top, 0px)); }
+  }
+  /* v25: keep the minimap clear of the touch buttons on short phone screens */
+  body.touch #minimap { pointer-events: none; }
+  body.touch #weapons .wslot:not(.active) { display: none; } /* phones: show only the weapon in hand; SWAP cycles */
+  @media (orientation: landscape) {
+    body.touch #minimap { top: calc(92px + env(safe-area-inset-top, 0px)); height: clamp(58px, calc(100vh - 256px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)), 105px); height: clamp(58px, calc(100dvh - 256px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)), 105px); width: auto; aspect-ratio: 200 / 210; }
+    #tUse { right: calc(192px + env(safe-area-inset-right, 0px)); bottom: calc(128px + env(safe-area-inset-bottom, 0px)); width: 56px; height: 56px; }
+    body.touch #targetHint, body.touch #stopHint { left: 44%; }
+  }
+  @media (orientation: landscape) and (max-width: 720px) {
+    body.touch #targetHint, body.touch #stopHint { left: 40%; font-size: 10.5px; padding: 2px 8px; }
+  }
+  @media (orientation: portrait) and (max-height: 700px) {
+    body.touch #minimap { width: 88px; height: 92px; }
+    body.touch #targetHint, body.touch #stopHint { left: 8px; transform: none; max-width: calc(100vw - 112px); overflow: hidden; text-overflow: ellipsis; }
+    body.touch.playing #rotateHint { top: calc(250px + env(safe-area-inset-top, 0px)); }
+  }
+  #shop { z-index: 12; background: rgba(6, 9, 14, 0.88); }
+  .shopCard { width: min(1000px, 100%); }
+  .shopHead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; } .shopHead h2 { margin: 0; flex: 1; }
+  .coins { font-weight: 700; color: #ffd24a; }
+  .shopNote { margin: 0; font-size: 13px; color: var(--hud-dim); }
+  #shopGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 10px; }
+  .skinCard { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--hud-line); border-radius: 10px; padding: 8px; display: grid; gap: 4px; justify-items: center; text-align: center; align-content: start; }
+  .skinCard canvas { width: 104px; height: 130px; }
+  .skinCard b { font-size: 13px; line-height: 1.2; } .skinCard small { font-size: 11px; color: var(--hud-dim); }
+  .skinCard button { width: 100%; font-size: 12px; padding: 6px 4px; }
+  .skinCard.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .skinCard.locked canvas { filter: grayscale(1) brightness(0.45); }
+  body.touch #shopGrid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+  body.touch .skinCard canvas { width: 80px; height: 100px; }
+  .menuCard { width: min(560px, 100%); max-width: calc(100vw - 32px); gap: 14px; grid-template-columns: minmax(0, 1fr); }
+  .menuCard > * { min-width: 0; }
+  .menuHead { display: flex; align-items: center; gap: 12px; } .menuHead h1 { margin: 0; flex: 1; }
+  .menuHead .langBtn { position: static; flex: none; white-space: nowrap; }
+  .menuHead h1 { min-width: 0; }
+  .seg { gap: 0 !important; } .seg button { flex: 1; border-radius: 0; } .seg button:first-child { border-radius: 10px 0 0 10px; } .seg button:last-child { border-radius: 0 10px 10px 0; }
+  #modeInfo { font-size: 14px; color: var(--hud-fg); margin-top: -4px; }
+  #levelInfo { margin-top: -6px; }
+  #startRow .primary { flex: 1; font-size: 17px; padding: 12px 18px; }
+  details.more { border-top: 1px solid var(--hud-line); padding-top: 10px; display: block; }
+  details.more > summary { cursor: pointer; list-style: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  details.more > summary::-webkit-details-marker { display: none; }
+  details.more > summary::before { content: '\25B8'; color: var(--hud-dim); transition: transform 0.15s; }
+  details.more[open] > summary::before { transform: rotate(90deg); }
+  details.more[open] > summary { margin-bottom: 10px; }
+  details.more > :not(summary) + :not(summary) { margin-top: 10px; }
+  details.mp { gap: 0; }
+  #xBox { display: flex; gap: 8px; align-items: center; } #xBox[hidden] { display: none; }
+  #xIn { width: 90px; letter-spacing: 0.2em; text-align: center; } #xMsg { color: var(--ok); font-weight: 600; font-size: 13px; }
+  #menuTitle { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  .mpHint { margin: 0; font-size: 12.5px; color: var(--hud-dim); }
+  #mpIdle { display: grid; gap: 8px; } #mpIdle[hidden] { display: none; }
 </style>
 
 <canvas id="scene" aria-label="Impossible Hunt game view"></canvas>
@@ -218,29 +294,32 @@
 </div>
 
 <div class="overlay" id="menu">
-  <div class="card">
-    <button type="button" class="langBtn" aria-label="切換為繁體中文">繁體中文</button>
-    <h1>Impossible Hunt</h1>
-    <p>The whole city is looking for you. Survive each level's clock to unlock the next: level 1 is 5 minutes, level 2 is 10, level 3 is 15, and the city gets tougher each time. Cameras sweep the streets, and anyone who sees you calls it in. Police chase and arrest on sight. Break line of sight, hide in alleys and parks, and use what you find to defend yourself.</p>
-    <div class="row" role="group" aria-label="Mode" id="modeRow"><span class="label">Mode</span><button type="button" data-gm="manhunt" aria-pressed="true">Manhunt</button><button type="button" data-gm="hunt" aria-pressed="false">The Hunt</button></div>
+  <div class="card menuCard">
+    <div class="menuHead"><h1 id="menuTitle">Impossible Hunt</h1><button type="button" class="langBtn" aria-label="切換為繁體中文">繁體中文</button></div>
+    <div id="xBox" hidden><input id="xIn" inputmode="numeric" maxlength="8" autocomplete="off" aria-label="Code"><span id="xMsg"></span></div>
+    <div class="row seg" role="group" aria-label="Mode" id="modeRow"><button type="button" data-gm="manhunt" aria-pressed="true">Manhunt</button><button type="button" data-gm="hunt" aria-pressed="false">The Hunt</button></div>
     <div id="modeInfo"></div>
     <div class="row levels" role="group" aria-label="Level" id="levelRow"><span class="label">Level</span></div>
     <div id="levelInfo"></div>
     <div class="row" id="startRow"><button class="primary" id="btnStart" type="button">Start the hunt</button><button class="touchOnly" style="display:none" id="btnFull" type="button">Full screen</button></div>
-    <div class="mp" id="mpBox">
-      <span class="label">Play with friends (online co-op, up to 4)</span>
-      <div id="mpIdle" class="row">
-        <input id="mpNick" maxlength="16" placeholder="Your name" aria-label="Your name" autocomplete="off">
+    <div class="row" id="skinRow"><span class="label">Skin</span><b id="skinNow"></b><span class="coins" id="coinNow"></span><button id="btnShop" type="button">Skin shop</button></div>
+    <details class="more mp" id="mpBox"><summary>Play with friends</summary>
+      <div id="mpIdle">
+        <div class="row"><input id="mpNick" maxlength="16" placeholder="Your name" aria-label="Your name" autocomplete="off"><button class="primary" id="btnQuick" type="button">Quick match</button></div>
+        <p class="mpHint">Quick match: play with anyone online, up to 4 players.</p>
+        <div class="row">
         <button id="btnHost" type="button">Create room</button>
         <input id="mpJoinCode" maxlength="6" placeholder="Code" aria-label="Room code" autocomplete="off" style="width:84px;text-transform:uppercase">
         <button id="btnJoin" type="button">Join</button>
+        </div>
       </div>
       <div id="mpIn" hidden>
         <div class="row"><span class="label">Room code</span><b id="mpCode"></b><button id="btnLeaveRoom" type="button">Leave room</button></div>
         <ul id="mpList"></ul>
       </div>
       <p id="mpStatus"></p>
-    </div>
+    </details>
+    <details class="more"><summary>How to play</summary>
     <div class="rules">
       <div><span style="background:#5fd6ff"></span><span><b>Cameras</b> on poles sweep a beam across the streets. Step into the beam and it turns red and the alert jumps.</span></div>
       <div><span style="background:#1c2a4a;border:1px solid #6a7ea8"></span><span><b>Police</b> (dark blue, with caps) chase you and hit you when they catch up. Stun them with a baton or taser.</span></div>
@@ -269,6 +348,8 @@
       <kbd>E</kbd><span>Get in or out of a car or scooter, board or leave the train</span>
       <kbd>P</kbd><span>Pause</span><kbd>Esc</kbd><span>Free mouse</span>
     </div>
+    </details>
+    <details class="more"><summary>Settings</summary>
     <div class="row" role="group" aria-label="Time of day">
       <span class="label">Time of day</span>
       <button type="button" data-mode="day" aria-pressed="false">Day</button>
@@ -281,6 +362,7 @@
       <button type="button" data-q="medium" aria-pressed="false">Medium</button>
       <button type="button" data-q="high" aria-pressed="false">High</button>
     </div>
+    </details>
   </div>
 </div>
 
@@ -310,6 +392,14 @@
   </div>
 </div>
 
+<div class="overlay" id="shop" hidden>
+  <div class="card shopCard">
+    <div class="shopHead"><h2>Skin shop</h2><span class="coins" id="shopCoins"></span><button id="btnShopBack" type="button">Back</button></div>
+    <p class="shopNote">Earn coins by playing: every second you survive, every police officer you take out and every level you win pays. Win levels to unlock more skins. Your coins and skins are saved on this device.</p>
+    <div class="row" id="shopTabs" role="group" aria-label="Style"></div>
+    <div id="shopGrid"></div>
+  </div>
+</div>
 <div class="overlay" id="over" hidden>
   <div class="card">
     <h2 id="overTitle">Captured</h2>
@@ -1376,7 +1466,7 @@ function writeNpcMatrices() {
     _o2.position.set(n.x, PL + fall * 0.35, n.z); _o2.rotation.set(-Math.PI / 2 * fall, n.yaw, 0, 'YXZ'); const fade = n.out ? clamp(1 - (n.outT - 18) / 2, 0, 1) : 1; _o2.scale.set(fade, fade, fade); _o2.updateMatrix(); _mb.copy(_o2.matrix);
     const put = (k, px, py, pz, rx, sx = 1, sy = 1, sz = 1) => { _o2.position.set(px, py, pz); _o2.rotation.set(rx, 0, 0); _o2.scale.set(sx, sy, sz); _o2.updateMatrix(); _m.multiplyMatrices(_mb, _o2.matrix); parts[k].setMatrixAt(i, _m); };
     put('torso', 0, 0, 0, 0); put('head', 0, 0, 0, 0);
-    put('hat', 0, n.hat === 2 ? 0.02 : 0, 0, 0, n.hat ? 1 : 0, n.hat === 2 ? 2 : 1, n.hat ? 1 : 0);
+    put('hat', 0, n.hat === 2 ? 1.98 - 1.95 * 1.8 : 0, 0, 0, n.hat ? 1 : 0, n.hat === 2 ? 1.8 : 1, n.hat ? 1 : 0); // hard hats are taller; keep them on the head
     put('legL', -0.13, 0.8, 0, swing); put('legR', 0.13, 0.8, 0, -swing);
     put('armL', -0.36, 1.45, 0, -swing * 0.8); put('armR', 0.36, 1.45, 0, swing * 0.8);
     put('bag', -0.42, n.bagLow ? 0.78 : 1.05, 0, 0, n.bag ? 1 : 0, n.bag ? 1 : 0, n.bag ? 1 : 0);
@@ -1395,6 +1485,289 @@ const pm = new THREE.Group();
   pm.held.position.set(0, -0.6, 0.1); pm.armR.add(pm.held);
   pm.add(pm.torso, pm.head, pm.hood, pm.legL, pm.legR, pm.armL, pm.armR); pm.visible = false; scene.add(pm);
 }
+
+// ---------- SKINS (shop, coins, looks for you and your friends) ----------
+const SKN = 0xd9a77a, BLD = 0xa0101a, BLD2 = 0x6a0610;
+const SKIN_CATS = ['Cool', 'Cute', 'Chill', 'Creative', 'Bloody', 'Violent'];
+// each skin: n name, t top, a arms (default top), l legs, s skin tone, gl glow, mt metal, p parts
+const SKIN_LIST = {
+  Cool: [
+    { n: 'Jack Wade', t: 0x16181d, l: 0x16181d, p: [['hair', 0x1d1610], ['tie', 0xf2f2f2, 0x0b0b0d], ['shoes', 0x0b0b0b]] },
+    { n: 'Neon Runner', t: 0x1a1d2a, l: 0x1a1d2a, p: [['hood', 0x1a1d2a], ['stripe', 0x39ff88, 1.3, 0.9], ['armband', 0x39ff88, 0.9], ['legstripe', 0x39ff88, 0.9], ['shoes', 0x39ff88, 0.6]] },
+    { n: 'Night Ninja', t: 0x141826, l: 0x141826, p: [['mask', 0x141826, SKN], ['belt', 0xa02020, 0xa02020], ['blade', 0xc0c8d0], ['shoes', 0x0b0d14]] },
+    { n: 'Biker', t: 0x2b2b2b, l: 0x23324a, p: [['helmet', 0xb02a2a, 0x111111], ['gloves', 0x111111], ['shoes', 0x111111], ['belt', 0x111111, 0xc0c8d0], ['vstripe', 0xb02a2a]] },
+    { n: 'Gold Agent', t: 0xd4a63a, l: 0xb8892c, mt: 0.5, p: [['hair', 0x2a1a10], ['glasses', 0x111111], ['tie', 0xfff3c4, 0x111111], ['shoes', 0x111111]] },
+    { n: 'Chrome Cyborg', t: 0xb8c2cc, l: 0x8c96a0, s: 0xb8c2cc, mt: 0.8, p: [['cybereye', 0xff2a2a], ['plate', 0x6f7a86, 0.8], ['gloves', 0x2a2f36], ['vstripe', 0xff2a2a, 0.8]] },
+    { n: 'Street Racer', t: 0xd22a2a, l: 0x1a1a1a, p: [['cap', 0x111111, 0xd22a2a], ['stripe', 0xffffff, 1.15], ['stripe', 0xffffff, 1.05], ['gloves', 0x111111], ['shoes', 0xffffff], ['legstripe', 0xd22a2a]] },
+    { n: 'Shadow Ops', t: 0x2d3326, l: 0x2d3326, p: [['beanie', 0x1a1d18], ['goggles', 0x111111, 0x3aff6a], ['plate', 0x3b4232], ['belt', 0x1a1d18], ['backpack', 0x3b4232], ['shoes', 0x1a1d18]] },
+    { n: 'Frost Assassin', t: 0xe8f4ff, l: 0xc9dceb, gl: 0.12, p: [['hood', 0xe8f4ff], ['lowmask', 0x7fd4ff], ['eyes', 0x7fd4ff, 1], ['gloves', 0x7fd4ff], ['scarf', 0x7fd4ff, 0.4], ['shoes', 0x9fdcff]] },
+    { n: 'Thunder Jacket', t: 0x1f2a5a, l: 0x111522, p: [['spiky', 0xffe14a], ['bolt', 0xffe14a], ['armband', 0xffe14a, 0.8], ['shoes', 0xffe14a], ['glasses', 0x111111]] },
+  ],
+  Cute: [
+    { n: 'Bunny Hoodie', t: 0xf6c6d8, l: 0xf0f0f0, p: [['hood', 0xf6c6d8], ['ears', 0xf6c6d8, 0xffffff, 'bunny'], ['tail', 0xffffff, 'bunny'], ['blush', 0xff8fb0], ['eyes', 0x2a1a20, 0, 1]] },
+    { n: 'Panda Suit', t: 0xf4f4f4, a: 0x1b1b1b, l: 0x1b1b1b, p: [['hood', 0xf4f4f4], ['ears', 0x1b1b1b, 0, 'round'], ['pandaeyes', 0x1b1b1b], ['tail', 0x1b1b1b, 'round'], ['belly', 0xffffff]] },
+    { n: 'Kitty Ears', t: 0xb59ad8, l: 0x5a4a7a, p: [['longhair', 0x3a2a24], ['ears', 0x3a2a24, 0xffb3c6, 'cat'], ['tail', 0x3a2a24, 'cat'], ['blush', 0xff8fb0], ['shoes', 0xffb3c6]] },
+    { n: 'Bubble Tea', t: 0xd8b48a, l: 0x6b4a32, p: [['beanie', 0xf4e2c8, 0x2a1a10], ['dots', 0x2a1a10, 9, 0.06, 11], ['straw', 0x5ad1ff], ['blush', 0xff9a8a], ['shoes', 0xf4e2c8]] },
+    { n: 'Duckling', t: 0xffd84a, l: 0xff9a2a, p: [['hood', 0xffd84a], ['beak', 0xff9a2a], ['tuft', 0xffd84a], ['tail', 0xffd84a, 'round'], ['shoes', 0xff9a2a], ['eyes', 0x111111, 0, 1]] },
+    { n: 'Strawberry', t: 0xe8324a, l: 0x2f8a3a, p: [['hood', 0xe8324a], ['leaf', 0x2f8a3a], ['dots', 0xffe58a, 12, 0.035, 5], ['blush', 0xff9ab0], ['shoes', 0x2f8a3a]] },
+    { n: 'Sleepy Bear', t: 0x9a6a44, l: 0x9a6a44, p: [['hood', 0x9a6a44], ['ears', 0x9a6a44, 0xd9b48a, 'round'], ['snout', 0xd9b48a, 0x2a1a10], ['belly', 0xd9b48a], ['tail', 0x9a6a44, 'round']] },
+    { n: 'Puppy Patrol', t: 0x2a4fa0, l: 0x1d2f5a, p: [['cap', 0x2a4fa0, 0x1d2f5a], ['ears', 0x8a5a3a, 0, 'floppy'], ['snout', 0xc89a6a, 0x111111], ['badge', 0xffd24a], ['tail', 0x8a5a3a, 'cat']] },
+    { n: 'Cloud Pajamas', t: 0xa8d8ff, l: 0xa8d8ff, p: [['beanie', 0xa8d8ff, 0xffffff], ['dots', 0xffffff, 7, 0.11, 21], ['shoes', 0xffffff], ['blush', 0xff9ab0]] },
+    { n: 'Mini Dino', t: 0x6ad06a, l: 0x4aa84a, p: [['hood', 0x6ad06a], ['dinospikes', 0xffb84a], ['tail', 0x6ad06a, 'dino'], ['belly', 0xf6f0b0], ['eyes', 0x111111, 0, 1]] },
+  ],
+  Chill: [
+    { n: 'Beach Shorts', t: 0xffffff, a: SKN, l: 0x2ab0c8, p: [['hair', 0xc8a060], ['glasses', 0x111111], ['shins', SKN], ['shoes', 0xffd24a], ['stripe', 0x2ab0c8, 1.45]] },
+    { n: 'Surfer', t: 0x1aa0b0, l: 0x1a1a1a, p: [['longhair', 0xe8c070], ['shins', SKN], ['stripe', 0xffffff, 1.2], ['board', 0xffb84a], ['shoes', SKN]] },
+    { n: 'Cozy Sweater', t: 0xb04a3a, l: 0x4a3a32, p: [['beanie', 0xf4e0c0, 0xb04a3a], ['stripe', 0xf4e0c0, 1.32], ['stripe', 0xf4e0c0, 1.0], ['armband', 0xf4e0c0], ['shoes', 0x6a4a3a]] },
+    { n: 'Skater', t: 0xc83a3a, l: 0x6a7a8a, p: [['beanie', 0x2a2a2a], ['bands', [0xc83a3a, 0x2a2a2a, 0xc83a3a, 0x2a2a2a, 0xc83a3a]], ['shoes', 0xffffff], ['hair', 0x6a4a2a]] },
+    { n: 'Lo-fi Headphones', t: 0x8a7ac8, l: 0x3a3a5a, p: [['hair', 0x2a1a10], ['headphones', 0xf4f4f4, 0xff9ac8], ['scarf', 0xff9ac8], ['shoes', 0xf4f4f4]] },
+    { n: 'Fisherman', t: 0xe8c84a, l: 0x3a5a4a, p: [['bucket', 0xe8c84a], ['beard', 0x9a9a9a], ['belt', 0x5a6a4a, 0x5a6a4a], ['shoes', 0x2a2a2a]] },
+    { n: 'Camper', t: 0x4a7a3a, l: 0x7a5a3a, p: [['beanie', 0xe86a2a, 0xe86a2a], ['backpack', 0xc84a2a], ['scarf', 0xe8c84a], ['shoes', 0x4a3020]] },
+    { n: 'Bathrobe', t: 0xf4f4f4, l: 0xf4f4f4, p: [['hair', 0x5a3a20], ['coat', 0xf4f4f4], ['belt', 0xd8d8d8, 0xd8d8d8], ['shins', SKN], ['shoes', 0x7ab8ff]] },
+    { n: 'Hammock Guy', t: 0xff8a5a, l: 0xe8d8b0, p: [['fedora', 0xe8d090, 0xc84a2a], ['glasses', 0x111111], ['dots', 0xffe14a, 8, 0.07, 9], ['shins', SKN], ['shoes', 0x8a5a3a]] },
+    { n: 'Sunset Shirt', t: 0xff7a3a, l: 0x2a2a3a, p: [['hair', 0x2a1a10], ['bands', [0xffd24a, 0xff9a3a, 0xff5a5a, 0xc84a8a, 0x6a4ac8], 0.15], ['glasses', 0x111111], ['shoes', 0xffd24a]] },
+  ],
+  Creative: [
+    { n: 'Paint Splatter', t: 0xf4f4f4, l: 0xd8d8d8, p: [['hair', 0x2a1a10], ['splats', [0xff4a6a, 0x4ac8ff, 0xffd24a, 0x6ae86a, 0xb06aff], 14, 3, 0, 3], ['shoes', 0x4ac8ff]] },
+    { n: 'Pixel Man', t: 0x3a6ae8, l: 0x2a2a6a, s: 0xffc89a, p: [['boxhead', 0xffc89a], ['flattop', 0x5a3a1a], ['eyes', 0x111111], ['belt', 0x111111, 0xffd24a], ['shoes', 0x5a3a1a]] },
+    { n: 'Cardboard Robot', t: 0xc8a06a, a: 0xb8905a, l: 0xc8a06a, p: [['boxhead', 0xc8a06a], ['eyes', 0x4ac8ff, 1], ['antenna', 0x8a8a8a, 0xff3a3a], ['stripe', 0xe0d0a8, 1.25], ['dots', 0xff3a3a, 3, 0.05, 2, 0.8]] },
+    { n: 'Living Graffiti', t: 0x2a2a2a, l: 0x2a2a2a, p: [['hood', 0x2a2a2a], ['splats', [0xff2ad8, 0x2af0ff, 0xc8ff2a, 0xff8a2a], 12, 8, 0.45, 2], ['diamonds', [0xff2ad8, 0x2af0ff]], ['shoes', 0xc8ff2a, 0.5]] },
+    { n: 'Glitch', t: 0x1a1a1a, l: 0x1a1a1a, p: [['hair', 0x2af0ff], ['blocks', [0xff2ad8, 0x2af0ff, 0xffffff], 4, 0.7], ['eyes', 0xff2ad8, 1], ['shoes', 0x2af0ff, 0.5]] },
+    { n: 'Origami', t: 0xf4f4f4, l: 0xe8e8e8, p: [['diamonds', [0xe84a4a, 0x4a7ae8, 0xf4f4f4], 8], ['paperhat', 0xe84a4a], ['shoes', 0xe84a4a]] },
+    { n: 'Rainbow Glass', t: 0xffffff, l: 0xe8e8ff, mt: 0.3, p: [['spiky', 0xff6ad8], ['bands', [0xff4a4a, 0xffa84a, 0xffe84a, 0x4ae86a, 0x4aa8ff, 0xa84aff], 0.35], ['shoes', 0xa84aff, 0.5]] },
+    { n: 'Comic Book', t: 0xffd24a, l: 0x3a5ae8, p: [['hair', 0x111111], ['domino', 0x111111], ['dots', 0xff4a4a, 14, 0.035, 13], ['cape', 0xe83a3a, 0xc82a2a], ['belt', 0x111111, 0xffd24a], ['shoes', 0xe83a3a]] },
+    { n: 'Mirror Suit', t: 0xd8e0e8, l: 0xd8e0e8, s: 0xd8e0e8, mt: 1, p: [['helmet', 0xd8e0e8, 0x222a33, 1], ['gloves', 0xd8e0e8], ['shoes', 0xd8e0e8]] },
+    { n: 'Neon Skeleton', t: 0x111111, l: 0x111111, s: 0x111111, p: [['skullface', 0x6affff, 1], ['ribs', 0x6affff, 1], ['bones', 0x6affff, 1], ['shoes', 0x6affff, 0.6]] },
+  ],
+  Bloody: [
+    { n: 'Butcher Apron', t: 0xe8e8e8, l: 0x3a3a3a, p: [['bandana', 0xf4f4f4], ['apron', 0xf0f0f0], ['splats', [BLD, BLD2], 9, 31], ['gloves', 0xd8d8d8], ['shoes', 0x2a2a2a]] },
+    { n: 'Zombie', t: 0x6a7a5a, l: 0x3a4a6a, s: 0x8ab87a, p: [['hair', 0x2a3a2a], ['forearms', 0x8ab87a], ['eyes', 0xffffaa, 0.6], ['stitches', 0x2a2a2a], ['splats', [BLD, 0x4a5a3a], 8, 41, 0, 2], ['shoes', 0x3a3a3a]] },
+    { n: 'Vampire Count', t: 0x111111, l: 0x111111, s: 0xe8e0e8, p: [['hair', 0x111111], ['cape', 0x111111, 0xa01020], ['collar', 0xa01020], ['eyes', 0xff2a2a, 1], ['fangs'], ['tie', 0xf4f4f4, 0xa01020]] },
+    { n: 'Slasher Mask', t: 0x2a3a5a, l: 0x2a3a5a, p: [['hair', 0x2a2a2a], ['hockey', 0xf0f0e8], ['splats', [BLD, BLD2], 6, 51], ['gloves', 0x111111], ['shoes', 0x111111]] },
+    { n: 'Red Rain', t: 0x222222, l: 0x222222, p: [['hood', BLD], ['dots', BLD, 16, 0.035, 61], ['scarf', BLD], ['shoes', BLD], ['eyes', 0xff4a4a, 0.8]] },
+    { n: 'Scarred Soldier', t: 0x4a5a3a, l: 0x4a5a3a, p: [['helmet', 0x3a4a2a], ['scar', 0xc04040], ['eyepatch', 0x111111], ['belt', 0x2a2a1a, 0x8a8a6a], ['chain', 0x6a6a4a], ['splats', [BLD, BLD2], 5, 71], ['shoes', 0x2a2a1a]] },
+    { n: 'Bloody Surgeon', t: 0x6ab8a8, l: 0x6ab8a8, p: [['bandana', 0x6ab8a8], ['lowmask', 0xd8f0f0], ['gloves', 0xd8e8ff], ['splats', [BLD, BLD2], 10, 81, 0, 2], ['shoes', 0xf4f4f4]] },
+    { n: 'Werewolf', t: 0x5a4a3a, a: 0x6a5a4a, l: 0x3a3a4a, s: 0x6a5a4a, p: [['ears', 0x5a4a3a, 0x3a2a1a, 'wolf'], ['snout', 0x7a6a5a, 0x111111], ['eyes', 0xffd24a, 1], ['tail', 0x5a4a3a, 'cat'], ['splats', [BLD], 5, 91], ['spiky', 0x5a4a3a]] },
+    { n: 'Haunted Doll', t: 0xe8b8c8, l: 0xf4f4f4, s: 0xf4e8e0, p: [['longhair', 0x2a1a10], ['bow', BLD], ['eyes', 0x111111, 0, 1], ['stitches', 0x8a2030], ['blush', 0xe88a9a], ['coat', 0xe8b8c8], ['splats', [BLD], 4, 101]] },
+    { n: 'Crimson Coat', t: 0x8a0a1a, l: 0x1a0a0a, gl: 0.1, p: [['hair', 0xf4f4f4], ['coat', 0x8a0a1a], ['collar', 0x5a0610], ['eyes', 0xff2a2a, 1], ['gloves', 0x111111], ['splats', [BLD2], 6, 111], ['shoes', 0x111111]] },
+  ],
+  Violent: [
+    { n: 'Warlord', t: 0x4a3a2a, l: 0x2a2a2a, p: [['helmet', 0x5a5a5a, null, 0.6], ['horns', 0xe8e0c8], ['pads', 0x6a6a6a, 0.5], ['spikes', 0xc8c8c8], ['cape', 0x8a1a1a], ['belt', 0x2a1a10, 0xc8a050]] },
+    { n: 'Gladiator', t: 0xb88a4a, a: SKN, l: 0xb88a4a, p: [['helmet', 0xc8a050, 0x111111, 0.6], ['crest', 0xc83a2a], ['plate', 0xc8a050, 0.6], ['pads', 0xc8a050, 0.6], ['shins', SKN], ['shoes', 0x7a5a3a]] },
+    { n: 'Riot Breaker', t: 0x1a1d24, l: 0x1a1d24, p: [['helmet', 0x2a2f3a, 0x6a8aa8], ['plate', 0x2a2f3a], ['pads', 0x2a2f3a], ['gloves', 0x111111], ['shield', 0x6a8aa8], ['shoes', 0x111111]] },
+    { n: 'Spiked Brawler', t: 0x2a2a2a, a: SKN, l: 0x3a3a5a, p: [['mohawk', 0xe83a8a], ['pads', 0x2a2a2a], ['spikes', 0xc8c8c8], ['gloves', 0x111111], ['chain', 0xa8a8a8], ['shoes', 0x111111]] },
+    { n: 'Demolition', t: 0xe8a02a, l: 0x3a3a3a, p: [['cap', 0xffd24a, 0xffd24a], ['stripe', 0xd8d8d8, 1.2, 0.3], ['goggles', 0x111111, 0xffb84a], ['backpack', 0xc83a2a], ['gloves', 0x5a3a20], ['shoes', 0x5a3a20]] },
+    { n: 'Iron Knuckles', t: 0x7a1a1a, l: 0x2a2a2a, p: [['bandana', 0x111111], ['glasses', 0x111111], ['gloves', 0x9aa4ae, 1], ['belt', 0x111111, 0x9aa4ae], ['shoes', 0x111111]] },
+    { n: 'Berserker', t: 0x7a5a3a, a: SKN, l: 0x4a3a2a, p: [['longhair', 0xc87a2a], ['beard', 0xc87a2a], ['warpaint', 0x3a6ae8], ['horns', 0xe8e0c8], ['pads', 0x8a6a4a], ['belt', 0x3a2a1a, 0x8a8a8a]] },
+    { n: 'Chainsaw Mechanic', t: 0x3a5a7a, l: 0x3a5a7a, p: [['cap', 0xc83a2a, 0xc83a2a], ['goggles', 0x2a2a2a, 0x8ad8ff], ['saw', 0xe86a2a, 0xa8b0b8], ['splats', [0x111111, 0x2a2a2a], 6, 121], ['gloves', 0x2a2a2a], ['shoes', 0x2a2a2a]] },
+    { n: 'Bounty Hunter', t: 0x5a4a3a, l: 0x3a3a3a, p: [['fedora', 0x3a2a1a, 0x8a6a4a], ['lowmask', 0xa04a2a], ['coat', 0x5a4a3a], ['chain', 0x8a6a4a], ['gloves', 0x2a1a10], ['shoes', 0x2a1a10]] },
+    { n: 'War Paint', t: 0x2a2a2a, a: SKN, l: 0x2a2a2a, gl: 0, p: [['warpaint', 0xe83a3a], ['eyes', 0xff2a2a, 1], ['pads', 0x8a1a1a], ['spikes', 0xc8c8c8], ['belt', 0x111111, 0xe83a3a], ['armband', 0xe83a3a]] },
+  ],
+};
+const SKINS = [{ id: 'runner', n: 'Runner', c: 'Starter', t: 0xe8742a, l: 0x2a2f3a, p: [['hood', 0xe8742a]], lvl: 1, price: 0 }];
+for (const c of SKIN_CATS) SKIN_LIST[c].forEach((s, i) => SKINS.push({ ...s, id: s.n.toLowerCase().replace(/[^a-z0-9]+/g, '-'), c, lvl: i + 1, price: (i + 1) * 100 }));
+const SKIN_BY = Object.fromEntries(SKINS.map(s => [s.id, s]));
+const skinRng = seed => () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+const SKIN_MATS = new Map(), SKIN_BOX = new THREE.BoxGeometry(1, 1, 1);
+function skinMat(col, em = 0, mt = 0) { const k = col + '|' + em + '|' + mt; let m = SKIN_MATS.get(k); if (!m) { m = new THREE.MeshStandardMaterial({ color: col, roughness: mt ? 0.35 : 0.78, metalness: Math.min(mt, 0.35), emissive: em ? col : 0x000000, emissiveIntensity: em }); SKIN_MATS.set(k, m); } return m; }
+let SKIN_ACC = [];
+function sb(par, w, h, d, x, y, z, col, o = {}) {
+  const m = new THREE.Mesh(SKIN_BOX, skinMat(col, o.em || 0, o.mt || 0)); m.scale.set(w, h, d); m.position.set(x, y, z);
+  if (o.rz) m.rotation.z = o.rz; if (o.rx) m.rotation.x = o.rx; if (o.ry) m.rotation.y = o.ry; m.castShadow = !o.ns; par.add(m); SKIN_ACC.push(m); return m;
+}
+function limbs(f, k, fn) { const L = k === 'L' ? [[f.legL, -1], [f.legR, 1]] : [[f.armL, -1], [f.armR, 1]]; for (const [p, s] of L) fn(p, s); }
+const SKIN_PARTS = {
+  hood: (f, c) => sb(f, 0.4, 0.4, 0.38, 0, 1.74, -0.04, c),
+  hair: (f, c) => { sb(f, 0.34, 0.08, 0.34, 0, 1.93, 0, c, { ns: 1 }); sb(f, 0.34, 0.26, 0.05, 0, 1.79, -0.155, c, { ns: 1 }); for (const s of [-1, 1]) sb(f, 0.04, 0.16, 0.3, s * 0.165, 1.82, -0.01, c, { ns: 1 }); },
+  flattop: (f, c) => sb(f, 0.45, 0.1, 0.43, 0, 2.0, 0, c),
+  longhair: (f, c) => { SKIN_PARTS.hair(f, c); sb(f, 0.36, 0.5, 0.06, 0, 1.66, -0.17, c, { ns: 1 }); },
+  spiky: (f, c) => { SKIN_PARTS.hair(f, c); for (const x of [-0.1, 0, 0.1]) sb(f, 0.08, 0.13, 0.08, x, 2.0, x === 0 ? -0.04 : 0.02, c, { ns: 1, rz: -x * 4 }); },
+  mohawk: (f, c) => sb(f, 0.07, 0.2, 0.36, 0, 1.99, -0.02, c),
+  cap: (f, c, b) => { sb(f, 0.35, 0.12, 0.35, 0, 1.95, 0, c); sb(f, 0.3, 0.03, 0.16, 0, 1.905, 0.22, b ?? c); },
+  beanie: (f, c, pom) => { sb(f, 0.36, 0.17, 0.36, 0, 1.95, 0, c); sb(f, 0.09, 0.09, 0.09, 0, 2.08, 0, pom ?? c); },
+  bucket: (f, c) => { sb(f, 0.48, 0.03, 0.48, 0, 1.9, 0, c); sb(f, 0.34, 0.15, 0.34, 0, 1.98, 0, c); },
+  fedora: (f, c, b) => { sb(f, 0.56, 0.03, 0.56, 0, 1.91, 0, c); sb(f, 0.34, 0.17, 0.34, 0, 2.0, 0, c); sb(f, 0.355, 0.045, 0.355, 0, 1.95, 0, b ?? c, { ns: 1 }); },
+  paperhat: (f, c) => { sb(f, 0.36, 0.04, 0.36, 0, 1.92, 0, c); for (const s of [-1, 1]) sb(f, 0.26, 0.04, 0.34, s * 0.09, 2.02, 0, c, { rz: s * -0.8 }); },
+  helmet: (f, c, v, mt) => {
+    if (v == null) { sb(f, 0.42, 0.2, 0.42, 0, 1.9, 0, c, { mt: mt || 0 }); sb(f, 0.42, 0.3, 0.06, 0, 1.75, -0.19, c, { mt: mt || 0 }); for (const s of [-1, 1]) sb(f, 0.05, 0.28, 0.36, s * 0.2, 1.76, -0.01, c, { mt: mt || 0 }); return; }
+    sb(f, 0.42, 0.44, 0.42, 0, 1.74, 0, c, { mt: mt || 0 }); sb(f, 0.32, 0.15, 0.02, 0, 1.75, 0.215, v, { ns: 1, mt: 0.6 });
+  },
+  mask: (f, c, e) => { sb(f, 0.34, 0.38, 0.34, 0, 1.72, 0, c); sb(f, 0.27, 0.06, 0.02, 0, 1.77, 0.175, e ?? SKN, { ns: 1 }); },
+  ears: (f, c, i, k) => {
+    for (const s of [-1, 1]) {
+      if (k === 'bunny') { sb(f, 0.08, 0.32, 0.05, s * 0.09, 2.1, -0.02, c); sb(f, 0.04, 0.22, 0.01, s * 0.09, 2.1, 0.008, i || c, { ns: 1 }); }
+      else if (k === 'cat' || k === 'wolf') { sb(f, 0.11, 0.14, 0.05, s * 0.12, 1.97, 0, c, { rz: s * -0.5 }); sb(f, 0.05, 0.08, 0.01, s * 0.12, 1.965, 0.028, i || c, { ns: 1, rz: s * -0.5 }); }
+      else if (k === 'floppy') sb(f, 0.06, 0.2, 0.13, s * 0.19, 1.72, -0.01, c);
+      else { sb(f, 0.12, 0.12, 0.05, s * 0.15, 1.94, 0, c); if (i) sb(f, 0.06, 0.06, 0.01, s * 0.15, 1.94, 0.028, i, { ns: 1 }); }
+    }
+  },
+  snout: (f, c, n) => { sb(f, 0.17, 0.1, 0.08, 0, 1.66, 0.2, c); sb(f, 0.07, 0.045, 0.02, 0, 1.695, 0.245, n ?? 0x111111, { ns: 1 }); },
+  beak: (f, c) => sb(f, 0.19, 0.06, 0.13, 0, 1.67, 0.21, c),
+  eyes: (f, c, em, big) => { for (const s of [-1, 1]) { if (big) sb(f, 0.09, 0.09, 0.01, s * 0.075, 1.76, 0.163, 0xffffff, { ns: 1 }); sb(f, big ? 0.05 : 0.06, big ? 0.06 : 0.045, 0.012, s * 0.075, 1.76, 0.17, c, { ns: 1, em: em || 0 }); } },
+  pandaeyes: (f, c) => { for (const s of [-1, 1]) sb(f, 0.1, 0.09, 0.01, s * 0.075, 1.755, 0.163, c, { ns: 1 }); SKIN_PARTS.eyes(f, 0xffffff, 0.2); },
+  blush: (f, c) => { for (const s of [-1, 1]) sb(f, 0.07, 0.035, 0.01, s * 0.1, 1.665, 0.163, c, { ns: 1 }); },
+  glasses: (f, c) => sb(f, 0.3, 0.065, 0.02, 0, 1.76, 0.17, c, { ns: 1 }),
+  goggles: (f, c, l) => { sb(f, 0.345, 0.05, 0.345, 0, 1.77, 0, c, { ns: 1 }); for (const s of [-1, 1]) sb(f, 0.1, 0.075, 0.03, s * 0.075, 1.77, 0.175, l, { ns: 1, em: 0.6 }); },
+  headphones: (f, c, k) => { sb(f, 0.37, 0.04, 0.08, 0, 1.935, 0, c, { ns: 1 }); for (const s of [-1, 1]) sb(f, 0.06, 0.14, 0.13, s * 0.19, 1.74, 0, k ?? c); },
+  bandana: (f, c) => { sb(f, 0.345, 0.08, 0.345, 0, 1.86, 0, c, { ns: 1 }); sb(f, 0.06, 0.12, 0.03, 0.05, 1.8, -0.18, c, { ns: 1, rz: 0.4 }); },
+  horns: (f, c) => { for (const s of [-1, 1]) { sb(f, 0.07, 0.07, 0.07, s * 0.17, 1.93, 0.02, c); sb(f, 0.05, 0.13, 0.05, s * 0.2, 2.01, 0.02, c, { rz: s * -0.4 }); } },
+  crest: (f, c) => sb(f, 0.05, 0.16, 0.44, 0, 2.03, -0.02, c),
+  leaf: (f, c) => { sb(f, 0.26, 0.04, 0.26, 0, 1.94, 0, c, { ry: 0.78 }); sb(f, 0.03, 0.09, 0.03, 0, 1.99, 0, c); },
+  tuft: (f, c) => { sb(f, 0.04, 0.1, 0.04, 0, 1.98, 0.04, c, { rz: 0.3 }); sb(f, 0.04, 0.08, 0.04, 0.04, 1.97, 0.04, c, { rz: -0.4 }); },
+  dinospikes: (f, c) => { for (const [y, z] of [[1.97, 0], [1.82, -0.2], [1.4, -0.17], [1.15, -0.17], [0.92, -0.17]]) sb(f, 0.04, 0.1, 0.1, 0, y, z, c, { rx: 0.78 }); },
+  skullface: (f, c, em) => { sb(f, 0.3, 0.32, 0.02, 0, 1.72, 0.168, c, { ns: 1, em: em || 0 }); for (const s of [-1, 1]) sb(f, 0.07, 0.07, 0.01, s * 0.07, 1.765, 0.18, 0x111111, { ns: 1 }); sb(f, 0.04, 0.04, 0.01, 0, 1.705, 0.18, 0x111111, { ns: 1 }); sb(f, 0.16, 0.03, 0.01, 0, 1.64, 0.18, 0x111111, { ns: 1 }); },
+  hockey: (f, c) => { sb(f, 0.3, 0.36, 0.03, 0, 1.72, 0.175, c, { ns: 1 }); for (const s of [-1, 1]) { sb(f, 0.07, 0.05, 0.01, s * 0.07, 1.77, 0.19, 0x111111, { ns: 1 }); sb(f, 0.03, 0.07, 0.01, s * 0.09, 1.82, 0.19, 0xb01020, { ns: 1, rz: s * -0.6 }); } for (const x of [-0.06, 0, 0.06]) for (const y of [1.66, 1.6]) sb(f, 0.025, 0.025, 0.01, x, y, 0.19, 0x333333, { ns: 1 }); },
+  warpaint: (f, c) => { sb(f, 0.3, 0.035, 0.01, 0, 1.765, 0.164, c, { ns: 1 }); for (const s of [-1, 1]) sb(f, 0.03, 0.12, 0.01, s * 0.07, 1.68, 0.164, c, { ns: 1 }); },
+  eyepatch: (f, c) => { sb(f, 0.08, 0.07, 0.02, 0.075, 1.76, 0.172, c, { ns: 1 }); sb(f, 0.335, 0.02, 0.335, 0, 1.79, 0, c, { ns: 1, rz: 0.25 }); },
+  scar: (f, c) => sb(f, 0.025, 0.15, 0.01, -0.075, 1.74, 0.165, c, { ns: 1, rz: 0.35 }),
+  cybereye: (f, c) => { sb(f, 0.13, 0.17, 0.02, 0.07, 1.75, 0.168, 0x6f7a86, { ns: 1, mt: 0.8 }); sb(f, 0.06, 0.05, 0.012, 0.075, 1.765, 0.18, c, { ns: 1, em: 1 }); },
+  boxhead: (f, c) => sb(f, 0.44, 0.42, 0.42, 0, 1.75, 0, c),
+  antenna: (f, c, b) => { sb(f, 0.03, 0.2, 0.03, 0, 2.06, 0, c); sb(f, 0.07, 0.07, 0.07, 0, 2.17, 0, b, { em: 0.8 }); },
+  beard: (f, c) => { sb(f, 0.3, 0.14, 0.04, 0, 1.6, 0.16, c, { ns: 1 }); for (const s of [-1, 1]) sb(f, 0.04, 0.16, 0.28, s * 0.15, 1.66, 0.02, c, { ns: 1 }); },
+  lowmask: (f, c) => sb(f, 0.33, 0.13, 0.34, 0, 1.62, 0.005, c, { ns: 1 }),
+  domino: (f, c) => sb(f, 0.34, 0.07, 0.345, 0, 1.765, 0, c, { ns: 1 }),
+  fangs: f => { for (const s of [-1, 1]) sb(f, 0.025, 0.04, 0.01, s * 0.03, 1.63, 0.165, 0xffffff, { ns: 1 }); },
+  bow: (f, c) => { sb(f, 0.11, 0.08, 0.04, -0.12, 1.95, 0.06, c, { rz: 0.4 }); sb(f, 0.11, 0.08, 0.04, -0.03, 1.95, 0.06, c, { rz: -0.4 }); },
+  stitches: (f, c) => { sb(f, 0.02, 0.12, 0.01, 0.1, 1.7, 0.164, c, { ns: 1 }); for (const y of [1.66, 1.7, 1.74]) sb(f, 0.06, 0.012, 0.01, 0.1, y, 0.166, c, { ns: 1 }); },
+  tie: (f, s, t) => { sb(f, 0.17, 0.42, 0.02, 0, 1.29, 0.155, s, { ns: 1 }); sb(f, 0.06, 0.34, 0.02, 0, 1.27, 0.166, t, { ns: 1 }); },
+  apron: (f, c) => sb(f, 0.46, 0.78, 0.02, 0, 1.0, 0.162, c, { ns: 1 }),
+  belly: (f, c) => sb(f, 0.34, 0.44, 0.02, 0, 1.12, 0.158, c, { ns: 1 }),
+  stripe: (f, c, y, em) => sb(f, 0.57, 0.08, 0.31, 0, y, 0, c, { ns: 1, em: em || 0 }),
+  bands: (f, cols, em) => cols.forEach((c, i) => sb(f, 0.57, 0.7 / cols.length, 0.31, 0, 1.5 - 0.35 / cols.length - i * 0.7 / cols.length, 0, c, { ns: 1, em: em || 0 })),
+  vstripe: (f, c, em) => sb(f, 0.08, 0.71, 0.31, 0, 1.15, 0, c, { ns: 1, em: em || 0 }),
+  splats: (f, cols, n, seed, em, legs) => {
+    const r = skinRng(seed);
+    for (let i = 0; i < n; i++) { const s = 0.05 + r() * 0.09; sb(f, s, s * (0.7 + r() * 0.6), 0.01, (r() - 0.5) * 0.46, 0.86 + r() * 0.6, 0.156, cols[i % cols.length], { ns: 1, em: em || 0, rz: r() * 3 }); }
+    if (legs) limbs(f, 'L', (p, sd) => { for (let i = 0; i < legs; i++) { const s = 0.05 + r() * 0.07; sb(p, s, s, 0.01, (r() - 0.5) * 0.14, -0.15 - r() * 0.55, 0.115, cols[(i + sd + 2) % cols.length], { ns: 1, em: em || 0, rz: r() * 3 }); } });
+  },
+  dots: (f, c, n, size, seed, em) => { const r = skinRng(seed || 7); for (let i = 0; i < n; i++) sb(f, size, size, 0.01, (r() - 0.5) * 0.46, 0.86 + r() * 0.6, 0.156, c, { ns: 1, em: em || 0 }); },
+  diamonds: (f, cols, n) => { const r = skinRng(3); for (let i = 0; i < (n || 6); i++) sb(f, 0.12, 0.12, 0.01, (r() - 0.5) * 0.4, 0.9 + r() * 0.52, 0.157, cols[i % cols.length], { ns: 1, rz: 0.785 }); },
+  blocks: (f, cols, seed, em) => { const r = skinRng(seed || 5); for (let i = 0; i < 11; i++) { const s = 0.05 + r() * 0.08, hd = i > 7; sb(f, s, s, s, (r() - 0.5) * (hd ? 0.5 : 0.7), hd ? 1.6 + r() * 0.35 : 0.85 + r() * 0.65, 0.12 + (r() - 0.5) * 0.3, cols[i % cols.length], { ns: 1, em: em || 0 }); } },
+  ribs: (f, c, em) => { sb(f, 0.05, 0.5, 0.012, 0, 1.18, 0.158, c, { ns: 1, em: em || 0 }); for (const y of [1.36, 1.26, 1.16, 1.06]) sb(f, 0.34, 0.035, 0.012, 0, y, 0.158, c, { ns: 1, em: em || 0 }); sb(f, 0.24, 0.06, 0.012, 0, 0.9, 0.158, c, { ns: 1, em: em || 0 }); },
+  bones: (f, c, em) => { limbs(f, 'L', p => sb(p, 0.05, 0.68, 0.01, 0, -0.4, 0.115, c, { ns: 1, em: em || 0 })); limbs(f, 'A', p => sb(p, 0.04, 0.5, 0.01, 0, -0.3, 0.085, c, { ns: 1, em: em || 0 })); },
+  pads: (f, c, mt) => { for (const s of [-1, 1]) sb(f, 0.24, 0.11, 0.34, s * 0.34, 1.53, 0, c, { mt: mt || 0 }); },
+  spikes: (f, c) => { for (const s of [-1, 1]) for (const z of [-0.08, 0.08]) sb(f, 0.05, 0.12, 0.05, s * 0.36, 1.64, z, c, { mt: 0.8 }); },
+  cape: (f, c, i) => { sb(f, 0.52, 1.0, 0.03, 0, 1.0, -0.175, c); if (i != null) sb(f, 0.48, 0.95, 0.01, 0, 1.0, -0.158, i, { ns: 1 }); },
+  collar: (f, c) => { sb(f, 0.52, 0.26, 0.04, 0, 1.62, -0.16, c); for (const s of [-1, 1]) sb(f, 0.04, 0.24, 0.18, s * 0.25, 1.6, -0.07, c); },
+  belt: (f, c, b) => { sb(f, 0.58, 0.07, 0.32, 0, 0.84, 0, c, { ns: 1 }); sb(f, 0.08, 0.06, 0.02, 0, 0.84, 0.165, b ?? 0xd8c070, { ns: 1, mt: 0.6 }); },
+  backpack: (f, c) => sb(f, 0.36, 0.44, 0.16, 0, 1.15, -0.23, c),
+  tail: (f, c, k) => {
+    if (k === 'bunny') sb(f, 0.13, 0.13, 0.1, 0, 0.88, -0.2, c);
+    else if (k === 'dino') { sb(f, 0.18, 0.16, 0.3, 0, 0.75, -0.3, c, { rx: -0.3 }); sb(f, 0.12, 0.1, 0.25, 0, 0.64, -0.52, c, { rx: -0.4 }); }
+    else if (k === 'round') sb(f, 0.1, 0.1, 0.08, 0, 0.9, -0.19, c);
+    else sb(f, 0.08, 0.08, 0.4, 0, 0.92, -0.33, c, { rx: -0.6 });
+  },
+  coat: (f, c) => sb(f, 0.6, 0.4, 0.34, 0, 0.6, 0, c),
+  shins: (f, c) => limbs(f, 'L', p => sb(p, 0.225, 0.42, 0.225, 0, -0.59, 0, c, { ns: 1 })),
+  shoes: (f, c, em) => limbs(f, 'L', p => sb(p, 0.24, 0.1, 0.3, 0, -0.76, 0.03, c, { ns: 1, em: em || 0 })),
+  legstripe: (f, c, em) => limbs(f, 'L', (p, s) => sb(p, 0.03, 0.8, 0.225, s * 0.1, -0.4, 0, c, { ns: 1, em: em || 0 })),
+  gloves: (f, c, big) => limbs(f, 'A', p => sb(p, big ? 0.22 : 0.17, big ? 0.18 : 0.14, big ? 0.22 : 0.17, 0, -0.56, 0, c, { ns: 1, mt: big ? 0.7 : 0 })),
+  forearms: (f, c) => limbs(f, 'A', p => sb(p, 0.165, 0.34, 0.165, 0, -0.45, 0, c, { ns: 1 })),
+  armband: (f, c, em) => limbs(f, 'A', p => sb(p, 0.17, 0.05, 0.17, 0, -0.2, 0, c, { ns: 1, em: em || 0 })),
+  plate: (f, c, mt) => { sb(f, 0.5, 0.5, 0.04, 0, 1.2, 0.17, c, { mt: mt || 0 }); sb(f, 0.5, 0.5, 0.04, 0, 1.2, -0.17, c, { mt: mt || 0 }); },
+  chain: (f, c) => sb(f, 0.06, 0.8, 0.33, 0, 1.15, 0, c, { rz: 0.7, mt: 0.6 }),
+  scarf: (f, c, em) => { sb(f, 0.42, 0.09, 0.34, 0, 1.53, 0, c, { em: em || 0 }); sb(f, 0.09, 0.28, 0.03, 0.1, 1.38, 0.17, c, { em: em || 0 }); },
+  saw: (f, b, bl) => { sb(f, 0.16, 0.24, 0.36, 0, 1.22, -0.28, b); sb(f, 0.06, 0.62, 0.05, 0, 1.6, -0.28, bl, { mt: 0.8 }); },
+  blade: (f, c) => sb(f, 0.06, 0.9, 0.04, 0, 1.25, -0.2, c, { rz: 0.6, mt: 0.8 }),
+  board: (f, c) => sb(f, 0.3, 1.05, 0.05, 0, 1.15, -0.2, c),
+  shield: (f, c) => sb(f.armL, 0.04, 0.62, 0.42, -0.1, -0.35, 0.05, c, { mt: 0.4 }),
+  bolt: (f, c) => { sb(f, 0.06, 0.22, 0.01, 0.03, 1.32, 0.157, c, { ns: 1, em: 0.8, rz: 0.5 }); sb(f, 0.14, 0.04, 0.01, 0, 1.2, 0.157, c, { ns: 1, em: 0.8 }); sb(f, 0.06, 0.22, 0.01, -0.03, 1.08, 0.157, c, { ns: 1, em: 0.8, rz: 0.5 }); },
+  badge: (f, c) => sb(f, 0.08, 0.08, 0.015, -0.14, 1.38, 0.158, c, { ns: 1, mt: 0.6 }),
+  straw: (f, c) => sb(f, 0.05, 0.5, 0.05, 0.2, 2.0, -0.05, c, { rz: -0.3 }),
+};
+function applySkin(fig, s) {
+  s = s || SKIN_BY.runner;
+  if (fig.__acc) for (const m of fig.__acc) if (m.parent) m.parent.remove(m);
+  fig.__acc = SKIN_ACC = [];
+  const set = (mesh, col, em, mt) => { const M = mesh.material; M.color.setHex(col); M.emissive.setHex(em ? col : 0x000000); M.emissiveIntensity = em || 0; M.metalness = Math.min(mt || 0, 0.35); M.roughness = mt ? 0.35 : 0.8; };
+  set(fig.torso, s.t, s.gl, s.mt); set(fig.armL, s.a ?? s.t, s.gl, s.mt); set(fig.armR, s.a ?? s.t, s.gl, s.mt);
+  set(fig.legL, s.l, 0, s.mt); set(fig.legR, s.l, 0, s.mt); set(fig.head, s.s ?? SKN, 0, s.s && s.mt ? s.mt : 0);
+  if (fig.hood) fig.hood.visible = false;
+  for (const p of s.p || []) { const fn = SKIN_PARTS[p[0]]; if (fn) fn(fig, ...p.slice(1)); }
+  SKIN_ACC = [];
+}
+function makeFig() {
+  const g = new THREE.Group(), M = () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
+  for (const k of ['torso', 'head', 'legL', 'legR', 'armL', 'armR']) { g[k] = new THREE.Mesh(PART_GEO[k], M()); g.add(g[k]); }
+  g.legL.position.set(-0.13, 0.8, 0); g.legR.position.set(0.13, 0.8, 0); g.armL.position.set(-0.36, 1.45, 0); g.armR.position.set(0.36, 1.45, 0);
+  return g;
+}
+// coins and what you own, saved on this device
+const SAVE = { coins: 100, owned: ['runner'], skin: 'runner' };
+try {
+  const c = parseInt(localStorage.getItem('portAlderCoins'), 10); if (!isNaN(c)) SAVE.coins = clamp(c, 0, 1e7);
+  const o = JSON.parse(localStorage.getItem('portAlderSkins') || 'null'); if (Array.isArray(o)) SAVE.owned = ['runner', ...o.filter(id => SKIN_BY[id] && id !== 'runner')];
+  const s = localStorage.getItem('portAlderSkin'); if (s && SAVE.owned.includes(s)) SAVE.skin = s;
+} catch (e) {}
+function saveSkins() { try { localStorage.setItem('portAlderCoins', String(SAVE.coins)); localStorage.setItem('portAlderSkins', JSON.stringify(SAVE.owned)); localStorage.setItem('portAlderSkin', SAVE.skin); } catch (e) {} }
+applySkin(pm, SKIN_BY[SAVE.skin]);
+// 3D previews: render each skin once into a small picture
+let shopR = null; const SKIN_THUMBS = new Map(), GAMMA = new Uint8Array(256).map((_, v) => Math.round(255 * Math.pow(v / 255, 1 / 2.2)));
+function skinThumb(s) {
+  let cv = SKIN_THUMBS.get(s.id); if (cv) return cv;
+  const W = 160, H = 200; cv = document.createElement('canvas'); cv.width = W; cv.height = H; SKIN_THUMBS.set(s.id, cv);
+  try {
+    if (!shopR) {
+      const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xffffff, 0x50586a, 1.15)); const d = new THREE.DirectionalLight(0xffffff, 1.1); d.position.set(2, 4, 5); sc.add(d);
+      const cam = new THREE.PerspectiveCamera(30, W / H, 0.1, 30); cam.position.set(0, 1.25, 4.15); cam.lookAt(0, 1.06, 0);
+      const fig = makeFig(); fig.rotation.y = -0.5; sc.add(fig);
+      shopR = { sc, cam, fig, rt: new THREE.WebGLRenderTarget(W, H), buf: new Uint8Array(W * H * 4) };
+    }
+    applySkin(shopR.fig, s);
+    const prev = renderer.getRenderTarget(), pc = new THREE.Color(); renderer.getClearColor(pc); const pa = renderer.getClearAlpha();
+    renderer.setRenderTarget(shopR.rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(shopR.sc, shopR.cam);
+    renderer.readRenderTargetPixels(shopR.rt, 0, 0, W, H, shopR.buf); renderer.setRenderTarget(prev); renderer.setClearColor(pc, pa);
+    const x = cv.getContext('2d'), img = x.createImageData(W, H), b = shopR.buf;
+    for (let y = 0; y < H; y++) for (let i = 0; i < W * 4; i++) { const v = b[(H - 1 - y) * W * 4 + i]; img.data[y * W * 4 + i] = v; }
+    x.putImageData(img, 0, 0);
+  } catch (e) {}
+  return cv;
+}
+let shopTab = 'All';
+function skinName(s) { return tr(s.n); }
+function renderSkinRow() {
+  if (!$('skinNow')) return;
+  $('skinNow').textContent = skinName(SKIN_BY[SAVE.skin]); $('coinNow').textContent = '🪙 ' + SAVE.coins;
+}
+function renderShop() {
+  renderSkinRow();
+  $('shopCoins').textContent = '🪙 ' + SAVE.coins;
+  const tabs = $('shopTabs'); tabs.innerHTML = '';
+  for (const t of ['All', ...SKIN_CATS]) { const b = document.createElement('button'); b.type = 'button'; b.textContent = tr(t); b.setAttribute('aria-pressed', String(t === shopTab)); b.addEventListener('click', () => { shopTab = t; renderShop(); }); tabs.appendChild(b); }
+  const grid = $('shopGrid'); grid.innerHTML = '';
+  for (const s of SKINS) {
+    if (shopTab !== 'All' && s.c !== shopTab) continue;
+    const own = SAVE.owned.includes(s.id), on = SAVE.skin === s.id, open = unlocked >= s.lvl;
+    const card = document.createElement('div'); card.className = 'skinCard' + (on ? ' on' : '') + (!own && !open ? ' locked' : '');
+    card.appendChild(skinThumb(s));
+    const nm = document.createElement('b'); nm.textContent = skinName(s); card.appendChild(nm);
+    const sm = document.createElement('small'); sm.textContent = tr(s.price ? `${s.c} · ${s.price} coins` : s.c); card.appendChild(sm);
+    const btn = document.createElement('button'); btn.type = 'button';
+    if (on) { btn.textContent = tr('Wearing'); btn.disabled = true; }
+    else if (own) { btn.textContent = tr('Wear'); btn.addEventListener('click', () => wearSkin(s.id)); }
+    else if (!open) { btn.textContent = tr(`Win level ${s.lvl - 1} to unlock`); btn.disabled = true; }
+    else { btn.textContent = tr(`Buy · ${s.price}`); btn.className = 'primary'; btn.disabled = SAVE.coins < s.price; btn.addEventListener('click', () => buySkin(s.id)); }
+    card.appendChild(btn); grid.appendChild(card);
+  }
+}
+function wearSkin(id) { if (!SAVE.owned.includes(id)) return; SAVE.skin = id; saveSkins(); applySkin(pm, SKIN_BY[id]); mpSend(true); renderShop(); }
+function buySkin(id) { const s = SKIN_BY[id]; if (!s || SAVE.owned.includes(id) || unlocked < s.lvl || SAVE.coins < s.price) return; SAVE.coins -= s.price; SAVE.owned.push(id); wearSkin(id); }
+function openShop() { $('shop').hidden = false; renderShop(); }
+$('btnShop').addEventListener('click', openShop);
+// a quiet extra: tap the title five times (or just type on the menu) to enter a code
+{
+  const fx = t => { let h = 0x811c9dc5; for (const ch of 'ih:' + t) { h ^= ch.charCodeAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h; };
+  const K = 0x3abf7b74;
+  const grant = () => { SAVE.owned = SKINS.map(s => s.id); saveSkins(); renderSkinRow(); if (!$('shop').hidden) renderShop(); $('xMsg').textContent = tr('All skins unlocked'); setTimeout(() => { $('xBox').hidden = true; $('xMsg').textContent = ''; }, 1600); };
+  const tryCode = v => { if (fx(String(v).replace(/\D/g, '').slice(-4)) === K) { grant(); return true; } return false; };
+  let taps = 0, tapT = 0;
+  $('menuTitle').addEventListener('click', () => { const n = performance.now(); taps = n - tapT < 700 ? taps + 1 : 1; tapT = n; if (taps >= 5) { taps = 0; $('xBox').hidden = false; $('xIn').value = ''; $('xIn').focus(); } });
+  $('xIn').addEventListener('input', e => { if (e.target.value.length >= 4 && tryCode(e.target.value)) e.target.value = ''; });
+  $('xIn').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 'Escape') { e.target.value = ''; $('xBox').hidden = true; } });
+  let typed = '';
+  window.addEventListener('keydown', e => { if (game.state !== 'menu' || /INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return; if (/^\d$/.test(e.key)) { typed = (typed + e.key).slice(-4); if (typed.length === 4 && tryCode(typed)) { typed = ''; $('xBox').hidden = false; } } });
+}
+$('btnShopBack').addEventListener('click', () => { $('shop').hidden = true; renderSkinRow(); });
 
 // ---------- weapon models (held in the hand, floating as pickups) ----------
 const WCOL = [0xffffff, 0x66e0ff, 0x4ad2ff, 0xd0d0d0, 0xffc27a, 0x9be26a, 0xfff6c8, 0xb07cff];
@@ -1790,6 +2163,11 @@ let LANG = 'en'; try { if (localStorage.getItem('portAlderLang') === 'zh') LANG 
 const ZH_LABEL = { citizen: '市民', 'police officer': '警察', celebrity: '名人', bodyguard: '保鑣', postman: '郵差', teacher: '老師', nurse: '護理師', 'construction worker': '工地工人', jogger: '慢跑者', 'apartment lobby': '公寓大廳', 'café': '咖啡廳', 'corner shop': '便利商店', 'metro station': '捷運站', 'office lobby': '辦公大樓大廳', Fists: '拳頭', 'Stun baton': '電擊警棍', Taser: '電擊槍', 'Smoke bomb': '煙霧彈', Bat: '球棒', Slingshot: '彈弓', Flashbang: '閃光彈', Caltrops: '鐵蒺藜', 'stun baton': '電擊警棍', taser: '電擊槍', 'smoke bomb': '煙霧彈', bat: '球棒', slingshot: '彈弓', flashbang: '閃光彈', caltrops: '鐵蒺藜', fists: '拳頭', Northside: '北區', 'East Quay': '東碼頭', Southbank: '南岸', Westgate: '西門' };
 const zl = s => ZH_LABEL[s] || s;
 const ZH = {
+  'Waiting for other players to join. You can start any time.': '正在等待其他玩家加入。你隨時可以開始。',
+  'Quick match': '快速配對', 'Quick match: play with anyone online, up to 4 players.': '快速配對：和線上任何人一起玩，最多 4 人。', 'Looking for a match…': '正在尋找對局…', 'Every public match is full right now. Try again soon.': '目前所有公開對局都滿了，請稍後再試。',
+  'All skins unlocked': '已解鎖全部造型',
+  'Play with friends': '和朋友一起玩', 'How to play': '玩法說明', Settings: '設定', 'Take out Rex Starling, then escape the police.': '解決雷克斯·星鷹，然後甩掉警察。', 'The whole city hunts you. Survive the clock.': '整座城市都在追捕你。撐到時間結束。',
+  "Skin": "造型", "Skin shop": "造型商店", "Back": "返回", "Wear": "穿上", "Wearing": "穿著中", "All": "全部", "Coins earned": "獲得金幣", "Starter": "入門", "Cool": "酷炫", "Cute": "可愛", "Chill": "悠閒", "Creative": "創意", "Bloody": "血腥", "Violent": "暴力", "Style": "風格", "Earn coins by playing: every second you survive, every police officer you take out and every level you win pays. Win levels to unlock more skins. Your coins and skins are saved on this device.": "玩遊戲就能賺金幣：每多撐一秒、每擊倒一名警察、每贏一關都有獎勵。贏得關卡就能解鎖更多造型。你的金幣和造型會存在這台裝置上。", "Runner": "跑者", "Jack Wade": "傑克·韋德", "Neon Runner": "霓虹跑者", "Night Ninja": "暗夜忍者", "Biker": "機車騎士", "Gold Agent": "黃金特務", "Chrome Cyborg": "鉻合金生化人", "Street Racer": "街頭賽車手", "Shadow Ops": "暗影特勤", "Frost Assassin": "冰霜刺客", "Thunder Jacket": "雷電夾克", "Bunny Hoodie": "兔兔帽T", "Panda Suit": "熊貓裝", "Kitty Ears": "貓耳朵", "Bubble Tea": "珍珠奶茶", "Duckling": "小鴨", "Strawberry": "草莓", "Sleepy Bear": "愛睏熊", "Puppy Patrol": "狗狗巡警", "Cloud Pajamas": "雲朵睡衣", "Mini Dino": "迷你恐龍", "Beach Shorts": "海灘短褲", "Surfer": "衝浪手", "Cozy Sweater": "溫暖毛衣", "Skater": "滑板少年", "Lo-fi Headphones": "Lo-fi 耳機", "Fisherman": "漁夫", "Camper": "露營客", "Bathrobe": "浴袍", "Hammock Guy": "吊床大叔", "Sunset Shirt": "夕陽襯衫", "Paint Splatter": "油漆噴濺", "Pixel Man": "像素人", "Cardboard Robot": "紙箱機器人", "Living Graffiti": "活塗鴉", "Glitch": "故障人", "Origami": "摺紙人", "Rainbow Glass": "彩虹玻璃", "Comic Book": "漫畫英雄", "Mirror Suit": "鏡面裝", "Neon Skeleton": "霓虹骷髏", "Butcher Apron": "屠夫圍裙", "Zombie": "殭屍", "Vampire Count": "吸血鬼伯爵", "Slasher Mask": "殺手面具", "Red Rain": "血雨", "Scarred Soldier": "疤面士兵", "Bloody Surgeon": "血腥外科醫生", "Werewolf": "狼人", "Haunted Doll": "鬼娃娃", "Crimson Coat": "緋紅大衣", "Warlord": "軍閥", "Gladiator": "角鬥士", "Riot Breaker": "鎮暴者", "Spiked Brawler": "尖刺鬥士", "Demolition": "爆破手", "Iron Knuckles": "鐵拳", "Berserker": "狂戰士", "Chainsaw Mechanic": "電鋸技師", "Bounty Hunter": "賞金獵人", "War Paint": "戰紋",
   'Police car': '警車', Rex: '雷克斯', Train: '火車', You: '你',
   'Rex Starling\u2019s bodyguards are coming for you!': '雷克斯·星鷹的保鑣衝過來了！', 'A bodyguard hits you! Fight back or run.': '保鑣打中你了！反擊或快逃。', 'The bodyguards lost you and went back to Rex Starling.': '保鑣跟丟了你，回到雷克斯·星鷹身邊。',
   'Reconnected to the host.': '已重新連上房主。',
@@ -1848,6 +2226,9 @@ const ZH = {
   hiding: '躲藏中', escaped: '已逃脫', captured: '被抓到', finished: '已結束', paused: '已暫停', 'in menu': '在選單中', ' · host': ' · 房主', ' (you)': '（你）', Player: '玩家',
 };
 const ZHRE = [
+  [/^Public match (\d+)$/, m => `公開對局 ${m[1]}`],
+  [/^(\d+) min · (\d+) cameras$/, m => `${m[1]} 分鐘 · ${m[2]} 台監視器`], [/^(\d+) min · (\d+) bodyguards · (\d+) s escape$/, m => `${m[1]} 分鐘 · ${m[2]} 名保鑣 · ${m[3]} 秒逃脫`],
+  [/^Buy · (\d+)$/, m => `購買 · ${m[1]}`], [/^Win level (\d+) to unlock$/, m => `贏得第 ${m[1]} 關後解鎖`], [/^(Cool|Cute|Chill|Creative|Bloody|Violent) · (\d+) coins$/, m => `${ZH[m[1]]} · ${m[2]} 金幣`],
   [/^Level (\d+) · The Hunt$/, m => `第 ${m[1]} 關 · 獵殺行動`], [/^Target: Rex Starling · (\d+) m$/, m => `目標：雷克斯·星鷹 · ${m[1]} 公尺`],
   [/^Level (\d+): (\d+) minutes to take down Rex Starling past his (\d+) bodyguards, then (\d+) seconds to escape the police\.$/, m => `第 ${m[1]} 關：${m[2]} 分鐘內突破 ${m[3]} 名保鑣解決雷克斯·星鷹，然後用 ${m[4]} 秒逃離警察。`], [/^(\d+) bodyguards protect him\. They attack if you get close or hurt him\.$/, m => `${m[1]} 名保鑣保護著他。你太靠近或傷到他，他們就會攻擊。`],
   [/^Rex Starling is down and you slipped away from the police\.(?: Level (\d+) is unlocked\.)?$/, m => `雷克斯·星鷹倒下了，你也成功擺脫了警察。${m[1] ? `第 ${m[1]} 關已解鎖。` : ''}`],
@@ -1876,10 +2257,10 @@ function tr(s) {
   for (const [re, fn] of ZHRE) { const m = re.exec(s); if (m) return fn(m); }
   return s;
 }
-const I18N_DYN = new Set(['modeInfo', 'targetHint', 'alTxt', 'levelTag', 'btnStart', 'btnNext', 'btnAgain', 'pauseStats', 'pauseHint', 'overTitle', 'overText', 'overStats', 'levelInfo', 'mpStatus', 'mpCode', 'mpList', 'prompt', 'stopHint', 'weapons', 'feed', 'timerTxt', 'hpTxt', 'stTxt', 'squad', 'tUse', 'loading']);
+const I18N_DYN = new Set(['modeInfo', 'targetHint', 'alTxt', 'levelTag', 'btnStart', 'btnNext', 'btnAgain', 'pauseStats', 'pauseHint', 'overTitle', 'overText', 'overStats', 'levelInfo', 'mpStatus', 'mpCode', 'mpList', 'prompt', 'stopHint', 'weapons', 'feed', 'timerTxt', 'hpTxt', 'stTxt', 'squad', 'tUse', 'loading', 'skinNow', 'coinNow', 'shopCoins', 'shopTabs', 'shopGrid', 'xMsg']);
 function applyLang() {
   document.documentElement.lang = LANG === 'zh' ? 'zh-Hant' : 'en'; document.body.classList.toggle('zh', LANG === 'zh');
-  for (const root of [$('menu'), $('pause'), $('over'), $('hud'), $('touch')]) {
+  for (const root of [$('menu'), $('pause'), $('over'), $('hud'), $('touch'), $('shop')]) {
     const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     for (let n = w.nextNode(); n; n = w.nextNode()) {
       let el = n.parentElement, skip = false; while (el && el !== root.parentElement) { if (I18N_DYN.has(el.id)) { skip = true; break; } el = el.parentElement; } if (skip) continue;
@@ -1890,7 +2271,7 @@ function applyLang() {
   }
   const ph = { mpNick: ['Your name', '你的名字'], mpJoinCode: ['Code', '代碼'] }; for (const id in ph) $(id).placeholder = LANG === 'zh' ? ph[id][1] : ph[id][0];
   document.querySelectorAll('.langBtn').forEach(b => { b.textContent = LANG === 'zh' ? 'English' : '繁體中文'; b.setAttribute('aria-label', LANG === 'zh' ? 'Switch to English' : '切換為繁體中文'); });
-  renderLevels(); renderWeapons(); renderLobby(); actT = 0; if (game.state === 'paused') { setPauseStats(); pauseHint(); } updateHud(); mpStatus(mpStatusEn);
+  renderLevels(); renderWeapons(); renderLobby(); actT = 0; if (game.state === 'paused') { setPauseStats(); pauseHint(); } updateHud(); mpStatus(mpStatusEn); renderSkinRow(); if (!$('shop').hidden) renderShop();
 }
 function setLang(l) { LANG = l; try { localStorage.setItem('portAlderLang', l); } catch (e) {} applyLang(); }
 
@@ -2103,6 +2484,7 @@ function updateHeli(dt) {
 // ---------- player ----------
 let fwdX = 0, fwdZ = 1;
 function updatePlayer(dt) {
+  if (touch.pendYaw || touch.pendPitch) { const k = 1 - Math.exp(-dt * 12), dy = touch.pendYaw * k, dp = touch.pendPitch * k; camYaw += dy; camPitch = clamp(camPitch + dp, 0.05, 0.95); touch.pendYaw -= dy; touch.pendPitch -= dp; if (Math.abs(touch.pendYaw) < 1e-4) touch.pendYaw = 0; if (Math.abs(touch.pendPitch) < 1e-4) touch.pendPitch = 0; }
   fwdX = Math.sin(camYaw); fwdZ = Math.cos(camYaw);
   let ix = 0, iz = 0;
   if (keys.KeyW || keys.ArrowUp) { ix += fwdX; iz += fwdZ; }
@@ -2152,6 +2534,7 @@ function stunNpc(n, t, dmg) {
   if (gmode === 'hunt' && (n.guard || n.celeb) && hunt.guards.length) provokeGuards();
   spawnSparks(n.x, PL + 1.1, n.z, fxCol, n.hp - dmg <= 0 ? 20 : 11, 4.2);
   n.hp -= dmg; n.goal = null; sfx.stun();
+  if (n.celeb && hunt.phase === 'hunt') n.hp = 0; // one hit that knocks Rex over counts: he never gets back up
   if (n.hp <= 0) {
     n.out = true; n.outT = 0; n.stun = 0; n.state = 'out'; n.moving = false; game.takenOut++; if (n.t === 'cop') { game.copsOut++; game.copCount--; }
     if (n.celeb) { celebDown(n); return 'out'; }
@@ -2169,7 +2552,7 @@ function attack() {
   const w = player.w, W = WEAPONS[w];
   if (!player.have[w]) { msg(`You don't have a ${W.name.toLowerCase()} yet.`); return; }
   if (W.uses && player.ammo[w] <= 0) { msg(`${W.name}: empty. Find a glowing crate.`); return; }
-  player.cd = W.cd; player.swing = 1; player.yaw = camYaw; fxCol = WCOL[w];
+  player.cd = W.cd; player.swing = 1; player.swingN = ((player.swingN || 0) + 1) % 1000; player.yaw = camYaw; fxCol = WCOL[w];
   const inFront = (n, range, fov) => { const dx = n.x - player.x, dz = n.z - player.z, d = Math.hypot(dx, dz); if (d > range) return false; const ang = Math.atan2(dx, dz); let diff = Math.abs(ang - camYaw); while (diff > Math.PI) diff = Math.abs(diff - Math.PI * 2); return diff < fov; };
   if (w === 0 || w === 1 || w === 4) {
     let hit = 0;
@@ -2430,19 +2813,20 @@ function resetGame() {
   huntSetup();
 }
 // ---------- touch controls ----------
-const touch = { mx: 0, my: 0, sprint: false, crouch: false, joyId: null, lookId: null, jx: 0, jy: 0, lx: 0, ly: 0 };
+const touch = { pendYaw: 0, pendPitch: 0, mx: 0, my: 0, sprint: false, crouch: false, joyId: null, lookId: null, jx: 0, jy: 0, lx: 0, ly: 0 };
 function enableTouchUI() { document.body.classList.add('touch'); for (const el of document.querySelectorAll('.touchOnly')) el.style.display = ''; }
 if (MOBILE) enableTouchUI();
 window.addEventListener('touchstart', () => { if (!document.body.classList.contains('touch')) enableTouchUI(); }, { once: true, passive: true });
 function setTouchSprint(v) { touch.sprint = v; $('tSprint').classList.toggle('on', v); if (v) { touch.crouch = false; $('tCrouch').classList.remove('on'); } }
 const joyEl = $('joy'), knob = $('joyKnob'), JOY_R = 50;
-function joyReset() { touch.joyId = null; touch.mx = touch.my = 0; knob.style.transform = ''; joyEl.classList.add('idle'); joyEl.style.left = '110px'; joyEl.style.top = 'calc(100% - 120px)'; }
+function joyReset() { touch.joyId = null; touch.mx = touch.my = 0; knob.style.transform = ''; joyEl.classList.add('idle'); const port = window.innerHeight > window.innerWidth; joyEl.style.left = (port ? 86 : 110) + 'px'; joyEl.style.top = `calc(100% - ${port ? 170 : 120}px)`; }
+window.addEventListener('resize', () => { if (touch.joyId === null) joyReset(); });
 const touchEl = $('touch');
 touchEl.addEventListener('touchstart', e => {
   if (game.state !== 'playing') return;
   for (const t of e.changedTouches) {
     if (t.target.closest && t.target.closest('.tbtn')) continue;
-    if (t.clientX < window.innerWidth * 0.45 && touch.joyId === null) {
+    if (t.clientX < window.innerWidth * 0.45 && touch.joyId === null && (window.innerHeight <= window.innerWidth || t.clientY > window.innerHeight * 0.4)) {
       touch.joyId = t.identifier; touch.jx = t.clientX; touch.jy = t.clientY;
       joyEl.style.left = t.clientX + 'px'; joyEl.style.top = t.clientY + 'px'; joyEl.classList.remove('idle');
     } else if (touch.lookId === null) { touch.lookId = t.identifier; touch.lx = t.clientX; touch.ly = t.clientY; }
@@ -2458,13 +2842,13 @@ touchEl.addEventListener('touchmove', e => {
       const dead = 0.15, m = Math.min(1, d / JOY_R);
       if (m < dead) { touch.mx = touch.my = 0; } else { touch.mx = dx / JOY_R; touch.my = -dy / JOY_R; }
     } else if (t.identifier === touch.lookId) {
-      camYaw -= (t.clientX - touch.lx) * 0.0062; camPitch = clamp(camPitch + (t.clientY - touch.ly) * 0.005, -0.15, 1.15);
+      touch.pendYaw -= (t.clientX - touch.lx) * 0.0036; touch.pendPitch += (t.clientY - touch.ly) * 0.0028; // eased in each frame below: gentler on the stomach
       touch.lx = t.clientX; touch.ly = t.clientY;
     }
   }
   e.preventDefault();
 }, { passive: false });
-const touchEnd = e => { for (const t of e.changedTouches) { if (t.identifier === touch.joyId) joyReset(); if (t.identifier === touch.lookId) touch.lookId = null; } };
+const touchEnd = e => { if (!e.touches || !e.touches.length) { touch.lookId = null; if (touch.joyId !== null) joyReset(); } for (const t of e.changedTouches) { if (t.identifier === touch.joyId) joyReset(); if (t.identifier === touch.lookId) touch.lookId = null; } };
 touchEl.addEventListener('touchend', touchEnd); touchEl.addEventListener('touchcancel', touchEnd);
 const tapBtn = (id, fn) => $(id).addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); audioInit(); fn(); }, { passive: false });
 tapBtn('tAttack', () => attack());
@@ -2506,7 +2890,8 @@ function endGame(win, why) {
   $('btnAgain').textContent = tr(win ? 'Replay level' : 'Try again'); $('btnAgain').classList.toggle('primary', !(win && level < MAX_LEVEL));
   renderLevels();
   $('overText').textContent = tr(H ? (win ? `Rex Starling is down and you slipped away from the police.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}` : why === 'time' ? 'Time ran out and the celebrity got away.' : 'The police got to you before you could escape.') : win ? (level >= MAX_LEVEL ? 'You beat every level. The city never got its hands on you.' : `Time is up and the city never got its hands on you.${newUnlock ? ` Level ${level + 1} is unlocked.` : ''}`) : `The city caught up with you after ${fmt(game.elapsed)}.`);
-  $('overStats').innerHTML = [[fmt(game.elapsed), 'Time survived'], [game.spottedCount, 'Times spotted'], [game.takenOut, 'People taken out'], [game.copsOut, 'Police taken out'], [Math.round(game.alert) + '%', 'Final alert']].map(([b, s]) => `<div><b>${b}</b><span>${tr(s)}</span></div>`).join('');
+  const earned = Math.round(game.elapsed / 5) + 10 * game.copsOut + (win ? (H ? 60 : 40) * level : 0); SAVE.coins += earned; saveSkins();
+  $('overStats').innerHTML = [[`+${earned}`, 'Coins earned'], [fmt(game.elapsed), 'Time survived'], [game.spottedCount, 'Times spotted'], [game.takenOut, 'People taken out'], [game.copsOut, 'Police taken out'], [Math.round(game.alert) + '%', 'Final alert']].map(([b, s]) => `<div><b>${b}</b><span>${tr(s)}</span></div>`).join('');
   if (sirenGain && AC) sirenGain.gain.setTargetAtTime(0, AC.currentTime, 0.2);
 }
 function quitToMenu() { leaveRoomsQuietly(); setGameClip(false); game.state = 'menu'; setPlayingClass(false); showOverlay('menu'); pm.visible = false; controls.enabled = true; controls.autoRotate = true; camera.position.copy(HOME_POS); controls.target.copy(HOME_TGT); controls.update(); if (document.pointerLockElement) document.exitPointerLock(); if (sirenGain && AC) sirenGain.gain.setTargetAtTime(0, AC.currentTime, 0.2); }
@@ -2520,7 +2905,8 @@ $('btnStart').addEventListener('click', () => { if (mp.on && mp.host) mpStartTog
 $('btnHost').addEventListener('click', () => { const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c = ''; for (let i = 0; i < 4; i++) c += A[Math.floor(Math.random() * A.length)]; mpJoin(c, true); });
 $('btnJoin').addEventListener('click', () => mpJoin($('mpJoinCode').value, false));
 $('mpJoinCode').addEventListener('keydown', e => { if (e.key === 'Enter') mpJoin($('mpJoinCode').value, false); });
-$('btnLeaveRoom').addEventListener('click', () => { mpLeave(); mpStatus(''); });
+$('btnLeaveRoom').addEventListener('click', () => { mpQuickTok++; mp.pub = false; mpLeave(); mpStatus(''); });
+$('btnQuick').addEventListener('click', () => { const nick = cleanNick($('mpNick').value); if (nick) { mp.nick = nick; } mpQuick(); });
 
 $('btnResume').addEventListener('click', resumeGame);
 $('btnRestart').addEventListener('click', () => { startGame(); });
@@ -2531,13 +2917,13 @@ function renderLevels() {
   for (let L = 1; L <= MAX_LEVEL; L++) { const b = document.createElement('button'); b.type = 'button'; b.textContent = L > unlocked ? '\uD83D\uDD12' : String(L); b.disabled = L > unlocked; b.setAttribute('aria-pressed', String(L === level)); b.setAttribute('aria-label', `Level ${L}, ${L * 5} minutes${L > unlocked ? ', locked' : ''}`); b.addEventListener('click', () => { level = L; renderLevels(); }); row.appendChild(b); }
   const c = levelCfg(level);
   renderModes();
-  if (selMode === 'hunt') { $('levelInfo').textContent = tr(`Level ${level}: ${huntMinutes(level)} minutes to take down Rex Starling past his ${guardCfg(level).n} bodyguards, then ${huntEscapeSecs(level)} seconds to escape the police.`); $('btnStart').textContent = tr(`Start level ${level}`); return; }
-  $('levelInfo').textContent = tr(`Level ${level}: survive ${level * 5} minutes with ${c.cams} cameras watching${level > 1 ? ' and more police than the level before' : ''}. Beat a level to unlock the next.`);
+  if (selMode === 'hunt') { $('levelInfo').textContent = tr(`${huntMinutes(level)} min · ${guardCfg(level).n} bodyguards · ${huntEscapeSecs(level)} s escape`); $('btnStart').textContent = tr(`Start level ${level}`); return; }
+  $('levelInfo').textContent = tr(`${level * 5} min · ${c.cams} cameras`);
   $('btnStart').textContent = tr(`Start level ${level}`);
 }
 function renderModes() {
   document.querySelectorAll('[data-gm]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.gm === selMode)));
-  $('modeInfo').textContent = tr(selMode === 'hunt' ? 'The Hunt: you are an assassin. Find the glowing celebrity Rex Starling and take him out. His bodyguards fight back, and there are more of them on higher levels. The police ignore you until he falls, then the whole city comes for you.' : 'Manhunt: the whole city hunts you. Survive the clock.');
+  $('modeInfo').textContent = tr(selMode === 'hunt' ? 'Take out Rex Starling, then escape the police.' : 'The whole city hunts you. Survive the clock.');
 }
 document.querySelectorAll('[data-gm]').forEach(b => b.addEventListener('click', () => { selMode = b.dataset.gm === 'hunt' ? 'hunt' : 'manhunt'; try { localStorage.setItem('portAlderMode', selMode); } catch (e) {} renderLevels(); }));
 renderLevels();
@@ -2903,7 +3289,7 @@ async function peerTransport(code, host) {
   const emitAll = () => cb([...others.entries()].map(([id, p]) => ({ id, ...p })));
   if (host) {
     peer.on('connection', c => {
-      if (conns.length >= 3) { c.on('open', () => c.close()); return; }
+      if (conns.length >= 3) { c.on('open', () => { try { c.send({ full: 1 }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 400); }); return; }
       conns.push(c); seen.set(c.peer, Date.now() + 14000); // a new friend gets 20 s to finish connecting
       c.on('data', d => { if (d && d.p) { seen.set(c.peer, Date.now()); others.set(c.peer, d.p); emitAll(); } });
       c.on('close', () => { conns = conns.filter(x => x !== c); others.delete(c.peer); emitAll(); });
@@ -2915,43 +3301,66 @@ async function peerTransport(code, host) {
       // a friend whose tab closed or crashed may never send a goodbye: drop anyone silent for 15 s
       for (const c of [...conns]) if (now - (seen.get(c.peer) ?? now) > 15000) { try { c.close(); } catch (e) {} conns = conns.filter(x => x !== c); others.delete(c.peer); seen.delete(c.peer); emitAll(); }
       const all = { [peer.id]: mine }; for (const [id, p] of others) all[id] = p; for (const c of conns) if (c.open) { try { c.send({ all }); } catch (e) {} }
-    }, 100);
+    }, 50);
   } else {
     toHost = peer.connect(hostId, { reliable: false });
     try { await new Promise((res, rej) => { toHost.on('open', res); toHost.on('error', rej); peer.on('error', rej); setTimeout(() => rej(new Error('no host')), 20000); }); } catch (e) { try { peer.destroy(); } catch (x) {} throw e; }
-    const hostLeft = () => { if (hostGone || dead) return; hostGone = true; others.clear(); emitAll(); msg('The host left the room.', 'warn'); errFn({ type: 'host-left' }); };
-    toHost.on('data', d => { if (d && d.all) { hostSeen = Date.now(); if (hostGone && !dead && toHost.open) { hostGone = false; msg('Reconnected to the host.', 'good'); errFn({ type: 'ok' }); } others = new Map(Object.entries(d.all).filter(([id]) => id !== peer.id)); emitAll(); } });
+    let full = false; const hostLeft = () => { if (hostGone || dead || full) return; hostGone = true; others.clear(); emitAll(); msg('The host left the room.', 'warn'); errFn({ type: 'host-left' }); };
+    toHost.on('data', d => { if (d && d.full) { full = true; errFn({ type: 'room-full' }); return; } if (d && d.all) { hostSeen = Date.now(); if (hostGone && !dead && toHost.open) { hostGone = false; msg('Reconnected to the host.', 'good'); errFn({ type: 'ok' }); } others = new Map(Object.entries(d.all).filter(([id]) => id !== peer.id)); emitAll(); } });
     toHost.on('close', hostLeft);
-    tick = setInterval(() => { const now = Date.now(); if (now - lastTick > 1500) hostSeen = Math.max(hostSeen, now); lastTick = now; if (now - hostSeen > 15000) hostLeft(); if (toHost.open) { try { toHost.send({ p: mine }); } catch (e) {} } }, 100);
+    tick = setInterval(() => { const now = Date.now(); if (now - lastTick > 1500) hostSeen = Math.max(hostSeen, now); lastTick = now; if (now - hostSeen > 15000) hostLeft(); if (toHost.open) { try { toHost.send({ p: mine }); } catch (e) {} } }, 50);
   }
   peer.on('disconnected', () => { if (!dead) { try { peer.reconnect(); } catch (e) {} } });
   peer.on('error', e => { if (!dead && e && !['peer-unavailable', 'disconnected', 'network'].includes(e.type)) errFn(e); });
   return { kind: 'peer', presence: p => { mine = { ...mine, ...p }; }, onPeers: fn => { cb = fn; }, onError: fn => { errFn = fn; }, connected: () => !peer.disconnected && (host || !!(toHost && toHost.open)), leave: () => { dead = true; clearInterval(tick); try { peer.destroy(); } catch (e) {} } };
 }
 // --- lobby ---
-async function mpJoin(code, host) {
-  code = cleanCode(code); if (code.length < 4) { mpStatus('Room codes are 4 to 6 letters or numbers.'); return; }
+async function mpJoin(code, host, quiet) {
+  if (!quiet) { mpQuickTok++; mp.pub = false; }
+  code = cleanCode(code); if (code.length < 4) { mpStatus('Room codes are 4 to 6 letters or numbers.'); return 'bad-code'; }
   const nick = cleanNick($('mpNick').value) || 'Player'; mp.nick = nick; try { localStorage.setItem('portAlderNick', nick); } catch (e) {}
   mpLeave(); mpStatus('Connecting…'); const tok = ++mp.tok;
   let net = null, why = ''; const onClaude = !!(window.claude && window.claude.use), ec = e => String((e && (e.code || e.type || e.message)) || e || 'error').slice(0, 40);
   try { net = await roomTransport(code); if (!net && onClaude) why = 'room unavailable'; } catch (e) { why = ec(e); net = null; }
-  if (tok !== mp.tok) { if (net) net.leave(); return; }
+  if (tok !== mp.tok) { if (net) net.leave(); return 'stale'; }
   if (!net) {
     try { net = await peerTransport(code, host); } catch (e) {
       const c = ec(e), dbg = `(${why ? why + ', ' : ''}${c})`;
-      if (tok !== mp.tok) return;
+      if (tok !== mp.tok) return 'stale';
+      if (quiet) return c;
       mpStatus(onClaude ? ['Online play could not connect on this page.', 'Every player has to be signed in to claude.ai and have this game shared with them. Otherwise play from the web link version.', dbg]
         : c === 'peer-unavailable' || c === 'no host' ? ['Could not find that room. Check the code and that your friend has created it.', dbg]
         : c === 'unavailable-id' ? ['That room code is already taken. Press Create room again for a new one.', dbg]
         : ['Could not reach the online play service. Check your internet connection and try again.', dbg], true);
-      return;
+      return c;
     }
-    if (tok !== mp.tok) { net.leave(); return; }
+    if (tok !== mp.tok) { net.leave(); return 'stale'; }
   }
   mp.net = net; mp.on = true; mp.code = code; mp.host = host; mp.peers.clear(); mp.kind = net.kind; mp.err = ''; mp.joinT = performance.now(); mp.discT = 0;
-  net.onError(e => { if (ec(e) === 'ok') { mp.err = ''; renderLobby(); return; } mp.err = ec(e); renderLobby(); if (game.state === 'playing' && mp.err !== 'host-left') msg('Online connection problem. Your friends may not see you.', 'warn'); });
+  net.onError(e => { if (ec(e) === 'ok') { mp.err = ''; renderLobby(); return; } mp.err = ec(e); renderLobby(); if (mp.pub && mp.err === 'host-left') { const t = mpQuickTok; setTimeout(() => { if (t === mpQuickTok && mp.pub) mpQuick(); }, 1500); return; } if (mp.err === 'room-full') return; if (game.state === 'playing' && mp.err !== 'host-left') msg('Online connection problem. Your friends may not see you.', 'warn'); });
   net.onPeers(list => { mp.peers = new Map(list.filter(p => p && p.pid && p.pid !== mp.myId).slice(0, 3).map(p => [p.pid, p])); mpWatchGo(); renderLobby(); });
-  mpSend(true); renderLobby();
+  mpSend(true); renderLobby(); return 'ok';
+}
+// --- public quick match: a fixed list of public rooms; join the first one with space, or open it ---
+let mpQuickTok = 0;
+async function mpQuick() {
+  const t = ++mpQuickTok; mp.pub = true; mpStatus('Looking for a match…');
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  for (let i = 1; i <= 8; i++) {
+    if (t !== mpQuickTok) return;
+    const code = 'PUB' + i, gone = r => /peer-unavailable|no host/.test(r);
+    let r = await mpJoin(code, false, true);
+    if (t !== mpQuickTok) return;
+    if (gone(r)) { r = await mpJoin(code, true, true); if (r === 'unavailable-id') r = await mpJoin(code, false, true); }
+    if (t !== mpQuickTok) return;
+    if (r !== 'ok') { if (gone(r) || r === 'unavailable-id' || r === 'stale') continue; mp.pub = false; mpStatus(['Could not reach the online play service. Check your internet connection and try again.', `(${r})`], true); return; }
+    await wait(2000);
+    if (t !== mpQuickTok || !mp.on) return;
+    if (mp.err === 'room-full' || mp.peers.size >= 4) { mpLeave(); continue; }
+    if (!mp.host && mp.kind === 'room' && ![...mp.peers.values()].some(p => p.host)) { mp.host = true; mpSend(true); }
+    renderLobby(); return;
+  }
+  mp.pub = false; mpStatus('Every public match is full right now. Try again soon.', true);
 }
 function mpLeave() { mp.tok++; if (mp.net) mp.net.leave(); mp.net = null; mp.on = false; mp.peers.clear(); for (const g of mp.ghosts.values()) scene.remove(g.grp); mp.ghosts.clear(); renderLobby(); }
 let mpStatusEn = '';
@@ -2961,12 +3370,12 @@ function mpColorIdx() { // the host is colour 0, everyone else in a fixed order 
   const all = [{ pid: mp.myId, host: mp.host }, ...mp.peers.values()].sort((a, b) => (b.host ? 1 : 0) - (a.host ? 1 : 0) || (a.pid < b.pid ? -1 : 1));
   return Math.max(0, all.findIndex(p => p.pid === mp.myId)) % 4;
 }
-let mpSendT = 0;
+let mpSendT = 0, mpSeq = 0; const mpVel = { x: 0, z: 0, px: null, pz: 0 };
 function mpSend(force) {
   if (!mp.on || !mp.net) return;
   const v = player.veh, st = game.state;
   mp.col = mpColorIdx();
-  const p = { pid: mp.myId, nick: mp.nick, col: mp.col, host: mp.host, lvl: level, st, x: Math.round(player.x * 10) / 10, z: Math.round(player.z * 10) / 10, yaw: Math.round(player.yaw * 100) / 100,
+  const p = { pid: mp.myId, nick: mp.nick, col: mp.col, host: mp.host, lvl: level, st, x: Math.round(player.x * 100) / 100, z: Math.round(player.z * 100) / 100, yaw: Math.round(player.yaw * 100) / 100, vx: Math.round(mpVel.x * 10) / 10, vz: Math.round(mpVel.z * 10) / 10, s: ++mpSeq, sw: player.swingN || 0, cr: player.crouch ? 1 : 0, sk: SAVE.skin, sp: player.sprint ? 1 : 0, wp: player.w,
     veh: v ? v.kind : '', vc: v ? v.col : 0, hide: !!(player.room || player.ride), hp: Math.round(player.hp), t: Math.round(game.timeLeft), al: Math.round(game.alert), res: game.lastResult || '' };
   if (mp.host) { p.go = mp.lastGo; p.goLvl = level; p.gm = selMode; }
   mp.net.presence(p);
@@ -2985,9 +3394,10 @@ function mpSpawnNearFriend() {
 function mpStartTogether() { if (!mp.on || !mp.host) return; mp.lastGo = Date.now(); startGame(); mpSend(true); }
 function renderLobby() {
   const box = $('mpBox'); if (!box) return;
+  if (mp.on) box.open = true;
   $('mpIdle').hidden = mp.on; $('mpIn').hidden = !mp.on;
   if (!mp.on) return;
-  $('mpCode').textContent = mp.code;
+  $('mpCode').textContent = mp.pub ? tr(`Public match ${mp.code.slice(3)}`) : mp.code;
   mp.col = mpColorIdx(); const rows = [{ nick: mp.nick, you: true, col: mp.col, host: mp.host }, ...mp.peers.values()];
   const list = $('mpList'); list.innerHTML = '';
   for (const p of rows) { const li = document.createElement('li'); const dot = document.createElement('span'); dot.className = 'mpdot'; dot.style.background = MP_COLS[p.col | 0] || MP_COLS[0]; li.appendChild(dot); li.appendChild(document.createTextNode((cleanNick(p.nick) || tr('Player')) + (p.you ? tr(' (you)') : '') + (p.host ? tr(' · host') : ''))); list.appendChild(li); }
@@ -2999,7 +3409,7 @@ function renderLobby() {
   else if (mp.discT > 5) { bad = true; lines.push('Connection lost. Trying to reconnect…'); }
   else {
     lines.push(mp.kind === 'room' ? 'Connected through claude.ai.' : 'Connected directly.');
-    if (mp.host) lines.push(mp.peers.size ? 'Everyone here starts when you press Start.' : 'Share the code with up to 3 friends. They open this same game and press Join.');
+    if (mp.host) lines.push(mp.peers.size ? 'Everyone here starts when you press Start.' : mp.pub ? 'Waiting for other players to join. You can start any time.' : 'Share the code with up to 3 friends. They open this same game and press Join.');
     else if (hostHere) lines.push('Waiting for the host to start. You can also play on your own meanwhile.');
     else if (age > 8) { bad = true; lines.push('Nobody has created this room yet. Check the code with your friend.'); }
     else lines.push('Looking for the host…');
@@ -3008,7 +3418,7 @@ function renderLobby() {
   mpStatus(lines, bad);
 }
 // --- other players in your city ---
-const ghostBody = new THREE.BoxGeometry(0.62, 0.8, 0.36).translate(0, 1.2, 0), ghostHead = new THREE.BoxGeometry(0.34, 0.34, 0.34).translate(0, 1.82, 0), ghostLegs = new THREE.BoxGeometry(0.5, 0.8, 0.3).translate(0, 0.4, 0);
+const ghostHood = new THREE.BoxGeometry(0.4, 0.4, 0.38).translate(0, 1.74, -0.04);
 const ghostBeam = new THREE.CylinderGeometry(0.4, 0.4, 150, 10, 1, true).translate(0, 78, 0);
 function nameTag(text, col) {
   const c = mk(256, 64), g = c.getContext('2d'); g.fillStyle = 'rgba(10,14,20,0.75)'; g.beginPath(); g.roundRect ? g.roundRect(4, 8, 248, 48, 22) : g.rect(4, 8, 248, 48); g.fill();
@@ -3020,10 +3430,14 @@ function ghostFor(id, p) {
   if (g && (g.col !== col || g.nick !== nick)) { scene.remove(g.grp); g = null; }
   if (!g) {
     const grp = new THREE.Group(), m = new THREE.MeshStandardMaterial({ color: col, roughness: 0.6, emissive: col, emissiveIntensity: 0.25 });
-    const man = new THREE.Group(); man.add(new THREE.Mesh(ghostBody, m), new THREE.Mesh(ghostHead, new THREE.MeshStandardMaterial({ color: 0xdba77d })), new THREE.Mesh(ghostLegs, new THREE.MeshStandardMaterial({ color: 0x2a2f3a })));
+    const skin = new THREE.MeshStandardMaterial({ color: 0xd9a77a, roughness: 0.8 }), pants = new THREE.MeshStandardMaterial({ color: 0x2a2f3a, roughness: 0.8 }), sh = x => { x.castShadow = true; return x; };
+    const man = new THREE.Group(); man.torso = sh(new THREE.Mesh(PART_GEO.torso, m)); man.head = sh(new THREE.Mesh(PART_GEO.head, skin)); man.hood = sh(new THREE.Mesh(ghostHood, m));
+    man.legL = sh(new THREE.Mesh(PART_GEO.legL, pants)); man.legR = sh(new THREE.Mesh(PART_GEO.legR, pants)); man.armL = sh(new THREE.Mesh(PART_GEO.armL, m.clone())); man.armR = sh(new THREE.Mesh(PART_GEO.armR, m.clone()));
+    man.legL.position.set(-0.13, 0.8, 0); man.legR.position.set(0.13, 0.8, 0); man.armL.position.set(-0.36, 1.45, 0); man.armR.position.set(0.36, 1.45, 0);
+    man.add(man.torso, man.head, man.hood, man.legL, man.legR, man.armL, man.armR);
     const tag = nameTag(nick, col), beam = new THREE.Mesh(ghostBeam, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false })); beam.frustumCulled = false;
     grp.add(man, tag, beam); scene.add(grp);
-    g = { grp, man, tag, beam, col, nick, x: p.x, z: p.z, yaw: p.yaw, vmesh: null, vkind: '' }; mp.ghosts.set(id, g);
+    g = { grp, man, tag, beam, col, nick, x: p.x, z: p.z, yaw: +p.yaw || 0, vmesh: null, vkind: '', s: -1, arr: 0, vx: 0, vz: 0, walkT: 0, spd: 0, swing: 0, sw: p.sw, cr: 0 }; mp.ghosts.set(id, g);
   }
   return g;
 }
@@ -3032,8 +3446,22 @@ function updateGhosts(dt) {
   for (const [id, p] of mp.peers) {
     if (typeof p.x !== 'number' || typeof p.z !== 'number') continue;
     live.add(id); const g = ghostFor(id, p);
-    const k = 1 - Math.exp(-dt * 10); g.x += (p.x - g.x) * k; g.z += (p.z - g.z) * k; g.yaw = lerpAngle(g.yaw, +p.yaw || 0, k);
-    if (Math.hypot(p.x - g.x, p.z - g.z) > 30) { g.x = p.x; g.z = p.z; }
+    if (g.sk !== p.sk) { g.sk = p.sk; applySkin(g.man, SKIN_BY[p.sk] || SKIN_BY.runner); }
+    // smooth movement: keep gliding along the friend's last known velocity, and ease out any error
+    const now = performance.now() / 1000, pvx = +p.vx || 0, pvz = +p.vz || 0;
+    if (p.s !== g.s) { g.s = p.s; g.arr = now; }
+    const ahead = Math.min(now - g.arr, 0.3), tx = p.x + pvx * ahead, tz = p.z + pvz * ahead;
+    g.vx += (pvx - g.vx) * (1 - Math.exp(-dt * 10)); g.vz += (pvz - g.vz) * (1 - Math.exp(-dt * 10));
+    if (now - g.arr < 0.5) { g.x += g.vx * dt; g.z += g.vz * dt; }
+    const kp = 1 - Math.exp(-dt * 7); g.x += (tx - g.x) * kp; g.z += (tz - g.z) * kp;
+    g.yaw = lerpAngle(g.yaw, +p.yaw || 0, 1 - Math.exp(-dt * 12));
+    if (Math.hypot(tx - g.x, tz - g.z) > 12) { g.x = tx; g.z = tz; }
+    // limbs: walk cycle from speed, punch when they attack, crouch
+    const sp = Math.hypot(g.vx, g.vz); g.spd += (sp - g.spd) * (1 - Math.exp(-dt * 8)); g.walkT += dt * g.spd * 1.55;
+    if (p.sw !== g.sw) { g.sw = p.sw; g.swing = 1; } g.swing = Math.max(0, g.swing - dt * 4);
+    g.cr += ((p.cr ? 1 : 0) - g.cr) * (1 - Math.exp(-dt * 10));
+    { const mv = p.veh ? 0 : clamp(g.spd / 2, 0, 1), sw = Math.sin(g.walkT) * (g.spd > 7 ? 0.9 : 0.55) * mv, M = g.man;
+      M.legL.rotation.x = sw; M.legR.rotation.x = -sw; M.armL.rotation.x = -sw * 0.8; M.armR.rotation.x = g.swing > 0 ? -1.6 * Math.sin(g.swing * Math.PI) - 0.2 : sw * 0.8; M.scale.y = 1 - 0.28 * g.cr; }
     const show = p.st === 'playing' && !p.hide && (game.state === 'playing' || game.state === 'paused');
     g.grp.visible = show;
     { const pd = Math.hypot(g.x - player.x, g.z - player.z), ts = clamp(pd / 22, 1, 9); g.tag.scale.set(2.4 * ts, 0.6 * ts, 1); g.tag.position.y = 2.6 + (ts - 1) * 0.9; g.beam.visible = pd > 18; }
@@ -3048,7 +3476,9 @@ function updateGhosts(dt) {
 }
 function updateMp(dt) {
   if (!mp.on) return;
-  mpSendT -= dt; if (mpSendT <= 0) { mpSendT = 0.1; mpSend(); }
+  // measure our own velocity so friends can predict where we are between updates
+  if (dt > 0) { if (mpVel.px === null || Math.hypot(player.x - mpVel.px, player.z - mpVel.pz) > 20) { mpVel.x = 0; mpVel.z = 0; } else { const k = 1 - Math.exp(-dt * 12); mpVel.x += ((player.x - mpVel.px) / dt - mpVel.x) * k; mpVel.z += ((player.z - mpVel.pz) / dt - mpVel.z) * k; } mpVel.px = player.x; mpVel.pz = player.z; }
+  mpSendT -= dt; if (mpSendT <= 0) { mpSendT = mp.kind === 'peer' ? 0.05 : 0.1; mpSend(); }
   if (mp.net && mp.net.connected) mp.discT = mp.net.connected() ? 0 : mp.discT + dt;
   mp.lobbyT -= dt; if (mp.lobbyT <= 0) { mp.lobbyT = 2; if (game.state === 'menu') renderLobby(); }
   updateGhosts(dt);
@@ -3225,7 +3655,7 @@ function frame(now) {
 applyQuality(qName);
 spawnPeople(); makePickups();
 window.__city = { scene, renderer, camera, controls, applyMode, applyQuality, frame, setT: v => { T = v; } };
-window.__game = { hunt, setSel: m => { selMode = m; renderLevels(); }, get gmode() { return gmode; }, setLang, tr, mp, mpJoin, mpLeave, updateGhosts, updateTrains, vehicles, pcars, STOPS, trains, cars, scoots, useAction, currentAction, enterVehicle, exitVehicle, nearestRide, boardTrain, get level() { return level; }, setLevel: L => { level = L; }, get unlocked() { return unlocked; }, endGame, allCams, doors, rooms, enterDoor, exitRoom, inSolid, inTree, updateCamera, setPitch: v => { camPitch = v; }, solids, game, player, npcs, cams, start: startGame, step: stepGame, pause: pauseGame, resume: resumeGame, heliS, setPlayer: (x, z) => { player.x = x; player.z = z; }, setYaw: y => { camYaw = y; }, keys, attack, pickups, smokes };
+window.__game = { get camYaw() { return camYaw; }, touch, hunt, setSel: m => { selMode = m; renderLevels(); }, get gmode() { return gmode; }, setLang, tr, mp, mpJoin, mpLeave, updateGhosts, updateTrains, vehicles, pcars, STOPS, trains, cars, scoots, useAction, currentAction, enterVehicle, exitVehicle, nearestRide, boardTrain, get level() { return level; }, setLevel: L => { level = L; }, get unlocked() { return unlocked; }, endGame, allCams, doors, rooms, enterDoor, exitRoom, inSolid, inTree, updateCamera, setPitch: v => { camPitch = v; }, solids, game, player, npcs, cams, start: startGame, step: stepGame, pause: pauseGame, resume: resumeGame, heliS, setPlayer: (x, z) => { player.x = x; player.z = z; }, setYaw: y => { camYaw = y; }, keys, attack, pickups, smokes };
 document.querySelectorAll('.langBtn').forEach(b => b.addEventListener('click', () => setLang(LANG === 'zh' ? 'en' : 'zh')));
 $('mpNick').value = mp.nick;
 { const q = new URLSearchParams(location.search).get('room'); if (q) $('mpJoinCode').value = cleanCode(q); }
